@@ -2,11 +2,31 @@
 #include <a_mysql>
 #include <zcmd>
 
+#define SQL_SERVER	"127.0.0.1"
+#define SQL_USER	""
+#define SQL_PASS	""
+#define SQL_DB		""
+
+new MySQL:gCon;
+
 public OnFilterScriptInit()
 {
 	print("\n--------------------------------------");
 	print("[MV]_cPanel by Michael@Belgium");
 	print("--------------------------------------\n");
+
+	gCon = mysql_connect(SQL_SERVER, SQL_USER, SQL_PASSW, SQL_DB);
+
+	if(mysql_errno(gCon) != 0) 
+	{
+		printf("Could not connect to database %s on %s", SQL_DB, SQL_SERVER);
+		print("Shutting down server.");
+
+		SendRconCommand("exit");
+	}
+	else
+		mysql_log(ALL);
+	
 	return 1;
 }
 
