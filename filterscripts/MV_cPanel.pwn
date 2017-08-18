@@ -89,7 +89,7 @@ public OnPlayerDisconnect(playerid, reason)
 	new string[128];
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, string, sizeof(string), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP]);
+		mysql_format(gCon, string, sizeof(string), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s' WHERE Playername = '%e'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], PlayerInfo[playerid][Name]);
 		mysql_query(gCon, string, false);
 	}
 	return 1;
@@ -315,30 +315,5 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 	return 1;
 }
 
-forward OnAccountCheck(playerid);
-public OnAccountCheck(playerid)
-{
-	if(cache_num_rows() == 1)
-		ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
-	else
-		ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
-}
-
-ShowPlayerDialogEx(playerid,dialogid)
-{
-	new string[128];
-	switch(dialogid)
-	{
-		case DIALOG_LOGIN:
-		{
-			format(string, sizeof(string), COL_WHITE"Your user is "COL_RED"registered"COL_WHITE"! Please "COL_BLUE"login"COL_WHITE" with your password below!", PlayerInfo[playerid][Name]);
-			ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "Login", string, "Login", "");
-		}
-
-		case DIALOG_REGISTER:
-		{
-			format(string, sizeof(string), COL_WHITE"Your user (%s) is "COL_RED"not"COL_WHITE" registered! Please "COL_BLUE"register"COL_WHITE" with a password below!", PlayerInfo[playerid][Name]);
-			ShowPlayerDialog(playerid, DIALOG_REGISTER, DIALOG_STYLE_PASSWORD, "Register", string, "Register", "");
-		}
-	}
-}
+#include <MV_cPanel/cPanel_Functions>
+#include <MV_cPanel/cPanel_Callbacks>
