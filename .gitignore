@@ -1,3 +1,5 @@
 pawno/
 gamemodes/
+plugins/
+logs/
 *.exe
