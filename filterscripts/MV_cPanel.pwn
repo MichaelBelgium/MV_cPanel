@@ -7,7 +7,34 @@
 #define SQL_PASS	""
 #define SQL_DB		""
 
+#define COL_RED		"{FF0000}"
+#define COL_WHITE	"{FFFFFF}"
+#define COL_BLUE	"{0000FF}"
+
+#define COLOR_RED	0xAA3333AA
+#define COLOR_GREEN	0x00FF00FF
+
 new MySQL:gCon;
+
+enum
+{
+	DIALOG_NORESPONSE,
+	DIALOG_REGISTER,
+	DIALOG_LOGIN
+};
+
+enum gPlayerInfo
+{
+	Name[MAX_PLAYER_NAME],
+	IP[16],
+	Score,
+	Money,
+	Adminlevel,
+	Deaths,
+	Kills
+};
+
+new PlayerInfo[MAX_PLAYERS][gPlayerInfo];
 
 public OnFilterScriptInit()
 {
@@ -15,9 +42,9 @@ public OnFilterScriptInit()
 	print("[MV]_cPanel by Michael@Belgium");
 	print("--------------------------------------\n");
 
-	gCon = mysql_connect(SQL_SERVER, SQL_USER, SQL_PASSW, SQL_DB);
+	gCon = mysql_connect(SQL_SERVER, SQL_USER, SQL_PASS, SQL_DB);
 
-	if(mysql_errno(gCon) != 0) 
+	if(mysql_errno(gCon) != 0)
 	{
 		printf("Could not connect to database %s on %s", SQL_DB, SQL_SERVER);
 		print("Shutting down server.");
@@ -26,7 +53,6 @@ public OnFilterScriptInit()
 	}
 	else
 		mysql_log(ALL);
-	
 	return 1;
 }
 
@@ -42,11 +68,30 @@ public OnPlayerRequestClass(playerid, classid)
 
 public OnPlayerConnect(playerid)
 {
+	new string[128];
+
+	GetPlayerName(playerid, PlayerInfo[playerid][Name], MAX_PLAYER_NAME);
+	GetPlayerIp(playerid, PlayerInfo[playerid][IP], 16);
+
+	PlayerInfo[playerid][Score] = 
+	PlayerInfo[playerid][Money] = 
+	PlayerInfo[playerid][Kills] =
+	PlayerInfo[playerid][Deaths] =
+	PlayerInfo[playerid][Adminlevel] = 0;
+
+	mysql_format(gCon, string, sizeof(string), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
+	mysql_tquery(gCon, string, "OnAccountCheck", "i", playerid);
 	return 1;
 }
 
 public OnPlayerDisconnect(playerid, reason)
 {
+	new string[128];
+	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
+	{
+		mysql_format(gCon, string, sizeof(string), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP]);
+		mysql_query(gCon, string, false);
+	}
 	return 1;
 }
 
@@ -57,6 +102,11 @@ public OnPlayerSpawn(playerid)
 
 public OnPlayerDeath(playerid, killerid, reason)
 {
+	if(killerid != INVALID_PLAYER_ID)
+	{
+		PlayerInfo[killerid][Kills]++;
+		PlayerInfo[playerid][Deaths]++;
+	}
 	return 1;
 }
 
@@ -207,10 +257,88 @@ public OnVehicleStreamOut(vehicleid, forplayerid)
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
+	new string[256];
+	switch(dialogid)
+	{
+		case DIALOG_LOGIN:
+		{
+			if(!response) 
+				ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
+			else
+			{
+				mysql_format(gCon, string, sizeof(string), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
+
+				new Cache:result = mysql_query(gCon, string);
+				new rows = cache_num_rows();
+				cache_delete(result);
+
+				if(rows == 1)
+				{
+					SendClientMessage(playerid, COLOR_GREEN, "Successfully logged in.");
+
+					cache_get_value_name_int(0, "Score", PlayerInfo[playerid][Score]);
+					cache_get_value_name_int(0, "Money", PlayerInfo[playerid][Money]);
+					cache_get_value_name_int(0, "Adminlevel", PlayerInfo[playerid][Adminlevel]);
+					cache_get_value_name_int(0, "Kills", PlayerInfo[playerid][Kills]);
+					cache_get_value_name_int(0, "Deaths", PlayerInfo[playerid][Deaths]);
+
+					ResetPlayerMoney(playerid);
+					GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
+					SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+				}
+				else
+				{
+					SendClientMessage(playerid, COLOR_RED, "Wrong password");
+					ShowPlayerDialogEx(playerid, DIALOG_LOGIN);
+				}
+			}
+		}
+
+		case DIALOG_REGISTER:
+		{
+			if(!response)
+				ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
+			else
+			{
+				mysql_format(gCon, string, sizeof(string), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
+				mysql_query(gCon, string, false);
+
+				SendClientMessage(playerid, COLOR_GREEN, "Successfully registered.");
+			}
+		}
+	}
 	return 1;
 }
 
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
 	return 1;
+}
+
+forward OnAccountCheck(playerid);
+public OnAccountCheck(playerid)
+{
+	if(cache_num_rows() == 1)
+		ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
+	else
+		ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
+}
+
+ShowPlayerDialogEx(playerid,dialogid)
+{
+	new string[128];
+	switch(dialogid)
+	{
+		case DIALOG_LOGIN:
+		{
+			format(string, sizeof(string), COL_WHITE"Your user is "COL_RED"registered"COL_WHITE"! Please "COL_BLUE"login"COL_WHITE" with your password below!", PlayerInfo[playerid][Name]);
+			ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "Login", string, "Login", "");
+		}
+
+		case DIALOG_REGISTER:
+		{
+			format(string, sizeof(string), COL_WHITE"Your user (%s) is "COL_RED"not"COL_WHITE" registered! Please "COL_BLUE"register"COL_WHITE" with a password below!", PlayerInfo[playerid][Name]);
+			ShowPlayerDialog(playerid, DIALOG_REGISTER, DIALOG_STYLE_PASSWORD, "Register", string, "Register", "");
+		}
+	}
 }
