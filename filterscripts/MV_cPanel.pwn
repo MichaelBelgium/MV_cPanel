@@ -31,10 +31,11 @@ enum gPlayerInfo
 	Money,
 	Adminlevel,
 	Deaths,
-	Kills
+	Kills,
+	OnlineTime
 };
 
-new PlayerInfo[MAX_PLAYERS][gPlayerInfo];
+new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
 
 public OnFilterScriptInit()
 {
@@ -68,8 +69,6 @@ public OnPlayerRequestClass(playerid, classid)
 
 public OnPlayerConnect(playerid)
 {
-	new string[128];
-
 	GetPlayerName(playerid, PlayerInfo[playerid][Name], MAX_PLAYER_NAME);
 	GetPlayerIp(playerid, PlayerInfo[playerid][IP], 16);
 
@@ -77,20 +76,20 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Money] = 
 	PlayerInfo[playerid][Kills] =
 	PlayerInfo[playerid][Deaths] =
+	PlayerInfo[playerid][OnlineTime] = 
 	PlayerInfo[playerid][Adminlevel] = 0;
 
-	mysql_format(gCon, string, sizeof(string), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
-	mysql_tquery(gCon, string, "OnAccountCheck", "i", playerid);
+	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
+	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
 	return 1;
 }
 
 public OnPlayerDisconnect(playerid, reason)
 {
-	new string[128];
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, string, sizeof(string), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s' WHERE Playername = '%e'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], PlayerInfo[playerid][Name]);
-		mysql_query(gCon, string, false);
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
+		mysql_query(gCon, query, false);
 	}
 	return 1;
 }
@@ -257,7 +256,6 @@ public OnVehicleStreamOut(vehicleid, forplayerid)
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	new string[256];
 	switch(dialogid)
 	{
 		case DIALOG_LOGIN:
@@ -266,9 +264,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
 			else
 			{
-				mysql_format(gCon, string, sizeof(string), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
+				mysql_format(gCon, query, sizeof(query), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
 
-				new Cache:result = mysql_query(gCon, string);
+				new Cache:result = mysql_query(gCon, query);
 				new rows = cache_num_rows();
 				cache_delete(result);
 
@@ -281,6 +279,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					cache_get_value_name_int(0, "Adminlevel", PlayerInfo[playerid][Adminlevel]);
 					cache_get_value_name_int(0, "Kills", PlayerInfo[playerid][Kills]);
 					cache_get_value_name_int(0, "Deaths", PlayerInfo[playerid][Deaths]);
+					cache_get_value_name_int(0, "OnlineTime", PlayerInfo[playerid][OnlineTime]);
 
 					ResetPlayerMoney(playerid);
 					GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
@@ -300,8 +299,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
 			else
 			{
-				mysql_format(gCon, string, sizeof(string), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
-				mysql_query(gCon, string, false);
+				mysql_format(gCon, query, sizeof(query), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
+				mysql_query(gCon, query, false);
 
 				SendClientMessage(playerid, COLOR_GREEN, "Successfully registered.");
 			}

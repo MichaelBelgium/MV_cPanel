@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Adminlevel` tinyint(4) NOT NULL DEFAULT '0',
   `Kills` int(11) NOT NULL DEFAULT '0',
   `Deaths` int(11) NOT NULL DEFAULT '0',
+  `OnlineTime` int(11) NOT NULL DEFAULT '0',
   `rIP` varchar(16) NOT NULL COMMENT 'Registered IP',
   `lIP` varchar(16) NOT NULL COMMENT 'Last IP',
   PRIMARY KEY (`Playername`)
