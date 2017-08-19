@@ -9,5 +9,10 @@ The script was originally created on 15/04/2011. Now this version will be a full
 * ZCMD
 * sscanf
 
+## Features
+* Login/Register system
+* SQL based
+* Admin system (5 levels)
+
 ## Media
 

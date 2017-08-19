@@ -17,6 +17,20 @@ ShowPlayerDialogEx(playerid,dialogid)
 	}
 }
 
+stock GetPlayerLevel(level)
+{
+    new playerlevel[32];
+    switch(level)
+    {
+        case LEVEL_TRIAL_MOD: playerlevel = "Trial moderator";
+        case LEVEL_MOD: playerlevel = "Moderator";
+        case LEVEL_TRIAL_ADMIN: playerlevel = "Trial administrator";
+        case LEVEL_ADMIN: playerlevel = "Administrator";
+        case LEVEL_OWNER: playerlevel = "Owner";
+    }
+    return playerlevel;
+}
+
 stock MsToString(millisecond, format[])
 {
     new

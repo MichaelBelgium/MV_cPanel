@@ -38,6 +38,15 @@ enum gPlayerInfo
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
 
+enum
+{
+	LEVEL_TRIAL_MOD = 1,
+	LEVEL_MOD,
+	LEVEL_TRIAL_ADMIN,
+	LEVEL_ADMIN,
+	LEVEL_OWNER
+};
+
 public OnFilterScriptInit()
 {
 	print("\n--------------------------------------");
@@ -55,6 +64,7 @@ public OnFilterScriptInit()
 	}
 	else
 		mysql_log(ALL);
+
 	return 1;
 }
 
