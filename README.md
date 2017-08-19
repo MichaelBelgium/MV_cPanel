@@ -7,6 +7,7 @@ The script was originally created on 15/04/2011. Now this version will be a full
 ## Requirements
 * SQL plugin (R41-1 or higher)
 * ZCMD
+* sscanf
 
 ## Media
 
