@@ -15,6 +15,9 @@
 #define COLOR_RED	0xAA3333AA
 #define COLOR_GREEN	0x00FF00FF
 
+#define COOLDOWN_COMMAND	5	//time in seconds between command executes
+#define COOLDOWN_CHAT		2	//time in seconds between chat messages
+
 new MySQL:gCon;
 
 enum
@@ -28,13 +31,14 @@ enum gPlayerInfo
 {
 	Name[MAX_PLAYER_NAME],
 	IP[16],
+	VIP,
 	Score,
 	Money,
 	Adminlevel,
 	Deaths,
 	Kills,
 	OnlineTime,
-	CommandTick
+	Tick[2] //0 = commands, 1 = chat
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -90,9 +94,13 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Deaths] =
 	PlayerInfo[playerid][OnlineTime] = 
 	PlayerInfo[playerid][Adminlevel] = 0;
+	PlayerInfo[playerid][VIP] = -1;
 
 	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
 	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
+
+	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Vips WHERE Name = '%e'",  PlayerInfo[playerid][Name]);
+	mysql_tquery(gCon, query, "OnVipLoaded", "i", playerid);
 	return 1;
 }
 
@@ -184,11 +192,23 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 
 public OnPlayerCommandReceived(playerid, cmdtext[])
 {
-	if(GetTickCount() - PlayerInfo[playerid][CommandTick] > 5000)
-		PlayerInfo[playerid][CommandTick] = GetTickCount();
+	if(GetTickCount() - PlayerInfo[playerid][Tick][0] > COOLDOWN_COMMAND*1000)
+		PlayerInfo[playerid][Tick][0] = GetTickCount();
 	else
 	{
 		SendClientMessage(playerid, COLOR_RED, "Slow down at executing commands.");
+		return 0;
+	}
+	return 1;
+}
+
+public OnPlayerText(playerid, text[])
+{
+	if(GetTickCount() - PlayerInfo[playerid][Tick][1] > COOLDOWN_CHAT*1000)
+		PlayerInfo[playerid][Tick][1] = GetTickCount();
+	else
+	{
+		SendClientMessage(playerid, COLOR_RED, "Slow down at chatting.");
 		return 0;
 	}
 	return 1;

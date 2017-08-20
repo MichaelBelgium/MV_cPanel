@@ -21,7 +21,7 @@ SendClientMessageToAdmins(color, message[])
 {
     for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
     {
-        if(PlayerInfo[i][Adminlevel] == 0) continue;
+        if(!IsPlayerConnected(i) || PlayerInfo[i][Adminlevel] == 0) continue;
         SendClientMessage(i, color, message);
     }
 }
@@ -39,6 +39,8 @@ stock GetPlayerLevel(level)
     }
     return playerlevel;
 }
+
+stock IsPlayerVIP(playerid) return PlayerInfo[playerid][VIP] != -1;
 
 stock MsToString(millisecond, format[])
 {
