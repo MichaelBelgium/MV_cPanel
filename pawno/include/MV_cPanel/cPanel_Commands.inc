@@ -32,3 +32,30 @@ CMD:stats(playerid,params[])
 	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, title, stats, "OK", "");
 	return 1;
 }
+
+CMD:admins(playerid, params[])
+{
+	new string[128], admins[256*5];
+	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+	{
+		if(PlayerInfo[i][Adminlevel] == 0) continue;
+		format(string, sizeof(string), "Name: %i - Level: %s (%i)\n", PlayerInfo[i][Name], GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Adminlevel]);
+		strcat(admins, string);
+	}
+
+	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Admins", admins, "OK", "");
+	return 1;
+}
+
+CMD:report(playerid, params[])
+{
+	new id, reason[32], string[128];
+	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /report [playerid] [reason]");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This playerid is not online.");
+
+	format(string, sizeof(string), "Incomming report! %s (%i) about %s (%i): %s", PlayerInfo[playerid][Name], playerid, PlayerInfo[id][Name], id, reason);
+	SendClientMessageToAdmins(COLOR_RED, string);
+
+	SendClientMessage(playerid,COLOR_RED,"Your report has been sent to all online administrators.");
+	return 1;
+}

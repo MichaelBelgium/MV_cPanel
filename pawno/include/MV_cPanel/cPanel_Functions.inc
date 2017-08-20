@@ -17,6 +17,15 @@ ShowPlayerDialogEx(playerid,dialogid)
 	}
 }
 
+SendClientMessageToAdmins(color, message[])
+{
+    for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+    {
+        if(PlayerInfo[i][Adminlevel] == 0) continue;
+        SendClientMessage(i, color, message);
+    }
+}
+
 stock GetPlayerLevel(level)
 {
     new playerlevel[32];
