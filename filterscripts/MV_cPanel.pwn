@@ -33,7 +33,8 @@ enum gPlayerInfo
 	Adminlevel,
 	Deaths,
 	Kills,
-	OnlineTime
+	OnlineTime,
+	CommandTick
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -178,6 +179,18 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
+	return 1;
+}
+
+public OnPlayerCommandReceived(playerid, cmdtext[])
+{
+	if(GetTickCount() - PlayerInfo[playerid][CommandTick] > 5000)
+		PlayerInfo[playerid][CommandTick] = GetTickCount();
+	else
+	{
+		SendClientMessage(playerid, COLOR_RED, "Slow down at executing commands.");
+		return 0;
+	}
 	return 1;
 }
 
