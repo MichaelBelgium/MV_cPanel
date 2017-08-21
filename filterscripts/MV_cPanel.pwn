@@ -11,6 +11,11 @@
 #define COL_RED		"{FF0000}"
 #define COL_WHITE	"{FFFFFF}"
 #define COL_BLUE	"{0000FF}"
+#define COL_VIP_1	"{411053}"
+#define COL_VIP_2	"{7B498D}"
+#define COL_GREEN 	"{6EF83C}"
+#define COL_ADMIN_1	"{FF0A00}"
+#define COL_ADMIN_2	"{FFFFFF}"
 
 #define COLOR_RED	0xAA3333AA
 #define COLOR_GREEN	0x00FF00FF
@@ -108,7 +113,7 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], PlayerInfo[playerid][Money], PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
 		mysql_query(gCon, query, false);
 	}
 	return 1;

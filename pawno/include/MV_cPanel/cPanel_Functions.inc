@@ -43,6 +43,30 @@ stock GetPlayerLevel(level)
 stock IsPlayerVIP(playerid) return PlayerInfo[playerid][VIP] != -1;
 stock IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
 
+stock GivePlayerScore(playerid, score)
+{
+    PlayerInfo[playerid][Score] += score;
+    SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+}
+
+stock GivePlayerCash(playerid, money)
+{
+    PlayerInfo[playerid][Money] += money;
+
+    ResetPlayerMoney(playerid);
+    GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
+}
+
+stock SetPlayerCash(playerid, money)
+{
+    PlayerInfo[playerid][Money] = money;
+
+    ResetPlayerMoney(playerid);
+    GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
+}
+
+stock GetPlayerCash(playerid) return PlayerInfo[playerid][Money];
+
 stock MsToString(millisecond, format[])
 {
     new

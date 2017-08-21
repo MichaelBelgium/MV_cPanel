@@ -21,11 +21,13 @@ public OnVipLoaded(playerid)
 		if(PlayerInfo[playerid][VIP] < gettime() && PlayerInfo[playerid][VIP] != 0)
 		{
 			PlayerInfo[playerid][VIP] = -1;
-			SendClientMessage(playerid, COLOR_RED, "Your VIP status has been expired.");
+			SendClientMessage(playerid, -1,  COL_VIP_1"-[VIP]-"COL_VIP_2" Your VIP status has been expired.");
 
 			mysql_format(gCon, query, sizeof(query), "DELETE FROM Vips WHERE Name = '%e'", PlayerInfo[playerid][Name]);
 			mysql_tquery(gCon, query);
 		}
+		else
+			SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]-"COL_VIP_2" Your vip settings have been loaded.");
 	}
 	else
 		PlayerInfo[playerid][VIP] = -1;
@@ -45,7 +47,7 @@ public OnPlayerLogin(playerid)
 		cache_get_value_name_int(0, "OnlineTime", PlayerInfo[playerid][OnlineTime]);
 
 		ResetPlayerMoney(playerid);
-		GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
+		SetPlayerCash(playerid, PlayerInfo[playerid][Money]);
 		SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
 	}
 	else
