@@ -41,6 +41,7 @@ stock GetPlayerLevel(level)
 }
 
 stock IsPlayerVIP(playerid) return PlayerInfo[playerid][VIP] != -1;
+stock IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
 
 stock MsToString(millisecond, format[])
 {

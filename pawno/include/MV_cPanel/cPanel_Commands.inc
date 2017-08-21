@@ -1,3 +1,17 @@
+CMD:cmds(playerid,params[])
+{
+	new cmds[256*3];
+
+	strcat(cmds, "/stats /admins /report\n");
+
+	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "\nOwner: /makevip /removevip\n");
+
+	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Available commands:", cmds, "OK", "");
+	return 1;
+}
+
+CMD:commands(playerid, params[]) return cmd_cmds(playerid,params);
+
 CMD:stats(playerid,params[])
 {
 	new string[128], stats[256], id, title[64];
@@ -6,7 +20,7 @@ CMD:stats(playerid,params[])
 	{
 		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[playerid][Name], playerid);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\n\n", PlayerInfo[playerid][Name], playerid, GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Adminlevel], IsPlayerVIP(id) ? ("yes") : ("no"));
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[playerid][Name], playerid, GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Adminlevel], IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\n\n",  PlayerInfo[playerid][Kills],  PlayerInfo[playerid][Deaths]);
@@ -19,7 +33,7 @@ CMD:stats(playerid,params[])
 	{
 		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[id][Name], id);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\n\n", PlayerInfo[id][Name], id, GetPlayerLevel(PlayerInfo[id][Adminlevel]), PlayerInfo[id][Adminlevel], IsPlayerVIP(id) ? ("yes") : ("no"));
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[id][Name], id, GetPlayerLevel(PlayerInfo[id][Adminlevel]), PlayerInfo[id][Adminlevel], IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\n\n",  PlayerInfo[id][Kills], PlayerInfo[id][Deaths]);
