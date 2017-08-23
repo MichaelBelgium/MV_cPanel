@@ -65,7 +65,7 @@ CMD:admins(playerid, params[])
 		admins = "No admins online";
 	else
 	{
-		format(string, sizeof(string), "There %s %i admin%s online:\n\n", count == 1 ? ("is") : ("are"), count, count == 1 ? ("s") : (""));
+		format(string, sizeof(string), "There %s %i admin%s online:\n\n", count == 1 ? ("is") : ("are"), count, count != 1 ? ("s") : (""));
 		strins(admins, string, 0);
 	}
 
@@ -124,7 +124,7 @@ CMD:makevip(playerid,params[])
 		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', 0)",PlayerInfo[id][Name]);
 		format(string, sizeof(string), "ever.");
 	}
-	else 
+	else
 	{
 		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL + %d MONTH)))",PlayerInfo[id][Name],duration);
 		format(string, sizeof(string), "%i months.", duration);
@@ -132,7 +132,7 @@ CMD:makevip(playerid,params[])
 
 	mysql_tquery(gCon, query);
 
-	PlayerInfo[id][VIP] = true;
+	VipInfo[id][Duration] = duration; //as long as it's not -1 it's fine.
 
 	format(string, sizeof(string),  COL_VIP_1"-[VIP]-"COL_VIP_2" %s has made you a VIP! You are vip for %s", PlayerInfo[playerid][Name], string);
 	SendClientMessage(id, -1, string);
@@ -147,7 +147,7 @@ CMD:removevip(playerid, params[])
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /removevip [playerid]");
 	if(!IsPlayerVIP(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't vip");
 
-	PlayerInfo[id][VIP] = 0;
+	VipInfo[id][Duration] = -1;
 	mysql_format(gCon, query, sizeof(query), "DELETE FROM Vips WHERE Name = '%e'", PlayerInfo[id][Name]);
 	mysql_tquery(gCon, query);
 
@@ -159,12 +159,16 @@ CMD:removevip(playerid, params[])
 CMD:vipveh(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	ShowPlayerDialog(playerid,DIALOG_VIP_VEH,DIALOG_STYLE_INPUT,"Spawn a Vehicle","Please fill in your vehicle Name","Spawn","Back");
 	return 1;
 }
 
 CMD:viprep(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You're not in any vehicle.");
+	RepairVehicle(GetPlayerVehicleID(playerid));
+	SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2"Your vehicle has been repaired.");
 	return 1;
 }
 
@@ -173,35 +177,81 @@ CMD:viprepair(playerid, params[]) return cmd_viprep(playerid, params);
 CMD:vipnos(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You're not in any vehicle.");
+	AddVehicleComponent(GetPlayerVehicleID(playerid), 1010);
+	SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2"Nitro has been added to your vehicle.");
 	return 1;
 }
 
 CMD:vipflip(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You're not in any vehicle.");
+
+	new Float:a;
+	GetVehicleZAngle(GetPlayerVehicleID(playerid),Float:a);
+	SetVehicleZAngle(GetPlayerVehicleID(playerid),Float:a);
+	SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2" Your vehicle has been flipped.");
 	return 1;
 }
 
 CMD:vipunlimnos(playerid, params[])
 {
+	new string[128];
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You're not in any vehicle.");
+
+	VipInfo[playerid][Toggle][0] = !VipInfo[playerid][Toggle][0];
+	format(string, sizeof(string), COL_VIP_1"-[VIP]-"COL_VIP_2" Unlimited nitro has been turned %s", VipInfo[playerid][Toggle][0] ? ("on") : ("off"));
+	SendClientMessage(playerid, -1, string);
 	return 1;
 }
 
 CMD:vipheal(playerid, params[])
 {
+	new string[128];
+
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(GetTickCount() - PlayerInfo[playerid][Tick][2] > COOLDOWN_VIP_HEAL*1000)
+	{
+		PlayerInfo[playerid][Tick][2] = GetTickCount();
+
+		SetPlayerHealth(playerid, 100.0);
+		SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]-"COL_VIP_2" Your health has succesfully been restored.");
+	}
+	else
+	{
+		format(string, sizeof(string), "You can't do that right now. You can again in %s.",MsToString(COOLDOWN_VIP_HEAL*1000 - (GetTickCount() - PlayerInfo[playerid][Tick][2]), "%1m minute(s) and %1s second(s)"));
+		SendClientMessage(playerid, COLOR_RED, string);
+	}
 	return 1;
 }
 
 CMD:vipgodcar(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	new string[128];
+
+	VipInfo[playerid][Toggle][2] = !VipInfo[playerid][Toggle][2];
+	format(string, sizeof(string), COL_VIP_1"-[VIP]-"COL_VIP_2"You have %s godcar", VipInfo[playerid][Toggle][2] ? ("enabled") : ("disabled"));
+	SendClientMessage(playerid, -1, string);
 	return 1;
 }
 
 CMD:viplock(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You're not in any vehicle.");
+	new string[128];
+
+	if(!VipInfo[playerid][Toggle][1])
+		LockVehicle(GetPlayerVehicleID(playerid));
+	else
+		UnlockVehicle(GetPlayerVehicleID(playerid));
+
+	format(string, sizeof(string), COL_VIP_1"-[VIP]-"COL_VIP_2" Your vehicle has been %slocked", !VipInfo[playerid][Toggle][1] ? ("") : ("un"));
+	SendClientMessage(playerid, -1, string);
+
+	VipInfo[playerid][Toggle][1] = !VipInfo[playerid][Toggle][1];
 	return 1;
 }

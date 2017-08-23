@@ -40,7 +40,7 @@ stock GetPlayerLevel(level)
     return playerlevel;
 }
 
-stock IsPlayerVIP(playerid) return PlayerInfo[playerid][VIP] != -1;
+stock IsPlayerVIP(playerid) return VipInfo[playerid][Duration] != -1;
 stock IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
 
 stock GivePlayerScore(playerid, score)
@@ -66,6 +66,20 @@ stock SetPlayerCash(playerid, money)
 }
 
 stock GetPlayerCash(playerid) return PlayerInfo[playerid][Money];
+
+stock UnlockVehicle(vehicleid) 
+{
+	new engine, lights, alarm, doors, bonnet, boot, objective;
+	GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
+	SetVehicleParamsEx(vehicleid, engine, lights, alarm, VEHICLE_PARAMS_OFF, bonnet, boot, objective);
+}
+
+stock LockVehicle(vehicleid) 
+{
+	new engine, lights, alarm, doors, bonnet, boot, objective;
+	GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
+	SetVehicleParamsEx(vehicleid, engine, lights, alarm, VEHICLE_PARAMS_ON, bonnet, boot, objective);
+}
 
 stock MsToString(millisecond, format[])
 {
