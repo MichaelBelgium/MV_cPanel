@@ -160,9 +160,6 @@ public OnPlayerConnect(playerid)
 
 	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
 	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
-
-	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Vips WHERE Name = '%e'",  PlayerInfo[playerid][Name]);
-	mysql_tquery(gCon, query, "OnVipLoaded", "i", playerid);
 	return 1;
 }
 

@@ -54,6 +54,9 @@ public OnPlayerLogin(playerid)
 		ResetPlayerMoney(playerid);
 		SetPlayerCash(playerid, PlayerInfo[playerid][Money]);
 		SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+
+		mysql_format(gCon, query, sizeof(query), "SELECT * FROM Vips WHERE Name = '%e'", PlayerInfo[playerid][Name]);
+		mysql_tquery(gCon, query, "OnVipLoaded", "i", playerid);
 	}
 	else
 	{

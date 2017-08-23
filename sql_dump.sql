@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS `Players` (
 CREATE TABLE IF NOT EXISTS `Vips` (
   `Name` varchar(24) NOT NULL,
   `Duration` int(11) NOT NULL DEFAULT '0',
+  `Toggle0` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Unlimited nitro',
+  `Toggle1` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Carlock',
+  `Toggle2` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Godcar',
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `Name` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
