@@ -2,11 +2,14 @@ CMD:cmds(playerid,params[])
 {
 	new cmds[256*3];
 
-	strcat(cmds, "General: /stats /admins /report\n");
+	strcat(cmds, "General:\nstats admins report\n\n");
 
-	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips: /vipveh /viprep /viprepair /viprep /vipnos /vipflip /vipunlimnos /vipheal /vipgodcar /viplock\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod: /a(chat)\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner: /makevip /removevip\n");
+	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay crew eject mute unmute weaponids slap spectate disarm adminduty\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail facepunch freeze unfreeze burn crash ajetpack\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\ncage uncage get goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip\n");
 
 	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Available commands:", cmds, "OK", "");
 	return 1;
@@ -111,6 +114,347 @@ CMD:a(playerid, params[])
 }
 
 CMD:achat(playerid, params[]) return cmd_a(playerid, params);
+
+CMD:warn(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:asay(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:crew(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:eject(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:mute(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:unmute(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:weaponids(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:slap(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:spectate(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:disarm(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+CMD:adminduty(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	return 1;
+}
+
+
+CMD:announce(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:kick(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:jail(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:unjail(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:facepunch(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:freeze(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:unfreeze(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:burn(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:crash(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:ajetpack(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+// CMD:veh(playerid, params[])
+// {
+// 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+// 	return 1;
+// }
+
+
+CMD:cage(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:uncage(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:get(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:goto(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:ban(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setinterior(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:spawn(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:sethealth(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setarmour(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:healall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setskin(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:giveweapon(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:explode(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:settime(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setweather(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:reconnect(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setallskin(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setalltime(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setallweather(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	return 1;
+}
+
+
+
+CMD:setscore(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setmoney(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:armourall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:setallscore(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:spawnall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:giveallweapon(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:killall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:getall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:ejectall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:godall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:ungodall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:freezeall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+CMD:unfreezeall(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	return 1;
+}
+
+
+CMD:setlevel(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
+	return 1;
+}
+
+CMD:fakechat(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
+	return 1;
+}
 
 CMD:makevip(playerid,params[])
 {

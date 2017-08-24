@@ -58,7 +58,8 @@ enum gPlayerInfo
 	OnlineTime,
 	Tick[3], //0 = commands, 1 = chat, 2 = vip heal
 	pTimer,
-	Selected_Id
+	Selected_Id,
+	Warns
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -161,6 +162,7 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Kills] =
 	PlayerInfo[playerid][Deaths] =
 	PlayerInfo[playerid][OnlineTime] = 
+	PlayerInfo[playerid][Warns] =
 	PlayerInfo[playerid][Adminlevel] = 0;
 	PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
 	VipInfo[playerid][Duration] = -1;
@@ -281,6 +283,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		case DIALOG_CPANEL_PLAYERPANEL:
 		{
 			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
+			if(!IsNumeric(inputtext)) 
+			{
+				SendClientMessage(playerid, COLOR_RED, "Please enter a playerid.");
+				return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
+			}
+
 			new id = strval(inputtext);
 
 			if (!IsPlayerConnected(id))
