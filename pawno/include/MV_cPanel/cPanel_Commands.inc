@@ -22,7 +22,7 @@ CMD:stats(playerid,params[])
 	{
 		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[playerid][Name], playerid);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[playerid][Name], playerid, GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Adminlevel], IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[playerid][Name], playerid, GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerLevel(playerid), IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[playerid][Kills],  PlayerInfo[playerid][Deaths], GetPlayerScore(playerid), GetPlayerCash(playerid));
@@ -35,7 +35,7 @@ CMD:stats(playerid,params[])
 	{
 		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[id][Name], id);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[id][Name], id, GetPlayerLevel(PlayerInfo[id][Adminlevel]), PlayerInfo[id][Adminlevel], IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[id][Name], id, GetPlayerLevelEx(GetPlayerLevel(id)), GetPlayerLevel(id), IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[id][Kills], PlayerInfo[id][Deaths], GetPlayerScore(id), GetPlayerCash(id));
@@ -55,7 +55,7 @@ CMD:admins(playerid, params[])
 	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
 	{
 		if(PlayerInfo[i][Adminlevel] == 0) continue;
-		format(string, sizeof(string), "Name: %s - Level: %s (%i)\n", PlayerInfo[i][Name], GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Adminlevel]);
+		format(string, sizeof(string), "Name: %s - Level: %s (%i)\n", PlayerInfo[i][Name], GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerLevel(playerid));
 		strcat(admins, string);
 
 		count++;
@@ -87,17 +87,17 @@ CMD:report(playerid, params[])
 }
 
 // ================= ADMIN COMMANDS ===========================
-// CMD:cpanel(playerid, params[])
-// {
-// 	if(IsPlayerAdmin(playerid))
-// 	{
-// 		PlayerInfo[playerid][Adminlevel] = LEVEL_OWNER;
-// 		SendClientMessage(playerid, COLOR_GREEN, "Server assigned you as an owner (level 5)");
-// 	}
+CMD:cpanel(playerid, params[])
+{
+	if(IsPlayerAdmin(playerid))
+	{
+		PlayerInfo[playerid][Adminlevel] = LEVEL_OWNER;
+		SendClientMessage(playerid, COLOR_GREEN, "Server assigned you as an owner (level 5)");
+	}
 	
-// 	ShowPlayerDialog(playerid,DIALOG_NORESPONSE,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Open player panel\nOpen server panel\nRestart server","Ok","Cancel");	
-// 	return 1;
-// }
+	ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
+	return 1;
+}
 
 CMD:a(playerid, params[])
 {
@@ -105,7 +105,7 @@ CMD:a(playerid, params[])
 	new msg[128], string[256];
 	if(sscanf(params, "s[128]", msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /a(chat) [message]");
 
-	format(string, sizeof(string), COL_ADMIN_1"%s %s (%i):"COL_ADMIN_2" %s", GetPlayerLevel(PlayerInfo[playerid][Adminlevel]), PlayerInfo[playerid][Name], playerid, msg);
+	format(string, sizeof(string), COL_ADMIN_1"%s %s (%i):"COL_ADMIN_2" %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], playerid, msg);
 	SendClientMessageToAdmins(-1, string);
 	return 1;
 }
@@ -141,7 +141,7 @@ CMD:makevip(playerid,params[])
 
 CMD:removevip(playerid, params[])
 {
-	if(PlayerInfo[playerid][Adminlevel] != LEVEL_OWNER) return 0;
+	if(GetPlayerLevel(playerid) != LEVEL_OWNER) return 0;
 
 	new id;
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /removevip [playerid]");

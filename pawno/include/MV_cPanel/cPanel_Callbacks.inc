@@ -19,7 +19,6 @@ public OnVipLoaded(playerid)
 		cache_get_value_name_bool(0, "Toggle0", VipInfo[playerid][Toggle][0]);
 		cache_get_value_name_bool(0, "Toggle1", VipInfo[playerid][Toggle][1]);
 		cache_get_value_name_bool(0, "Toggle2", VipInfo[playerid][Toggle][2]);
-
 		
 		printf("VIP %s has connected",PlayerInfo[playerid][Name]);
 

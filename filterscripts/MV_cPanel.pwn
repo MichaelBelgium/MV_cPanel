@@ -34,7 +34,16 @@ enum
 	DIALOG_NORESPONSE,
 	DIALOG_REGISTER,
 	DIALOG_LOGIN,
-	DIALOG_VIP_VEH
+	DIALOG_VIP_VEH,
+	DIALOG_CPANEL,
+	DIALOG_CPANEL_PLAYERPANEL,
+	DIALOG_CPANEL_SERVERPANEL,
+	DIALOG_CPANEL_SERVERPANEL_0,
+	DIALOG_CPANEL_SERVERPANEL_1,
+	DIALOG_CPANEL_SERVERPANEL_2,
+	DIALOG_CPANEL_SERVERPANEL_3,
+	DIALOG_CPANEL_SERVERPANEL_4,
+	DIALOG_CPANEL_SERVERPANEL_5
 };
 
 enum gPlayerInfo
@@ -48,7 +57,8 @@ enum gPlayerInfo
 	Kills,
 	OnlineTime,
 	Tick[3], //0 = commands, 1 = chat, 2 = vip heal
-	pTimer
+	pTimer,
+	Selected_Id
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -152,6 +162,7 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Deaths] =
 	PlayerInfo[playerid][OnlineTime] = 
 	PlayerInfo[playerid][Adminlevel] = 0;
+	PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
 	VipInfo[playerid][Duration] = -1;
 	VipInfo[playerid][Toggle][0] =
 	VipInfo[playerid][Toggle][1] =
@@ -167,11 +178,14 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), PlayerInfo[playerid][Adminlevel], PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
 		mysql_query(gCon, query, false);
 
-		mysql_format(gCon, query, sizeof(query), "UPDATE Vips SET Toggle0 = %d, Toggle1 = %d, Toggle2 = %d WHERE Name = '%e'", VipInfo[playerid][Toggle][0], VipInfo[playerid][Toggle][1], VipInfo[playerid][Toggle][2], PlayerInfo[playerid][Name]);
-		mysql_query(gCon, query, false);
+		if(IsPlayerVIP(playerid))
+		{
+			mysql_format(gCon, query, sizeof(query), "UPDATE Vips SET Toggle0 = %d, Toggle1 = %d, Toggle2 = %d WHERE Name = '%e'", VipInfo[playerid][Toggle][0], VipInfo[playerid][Toggle][1], VipInfo[playerid][Toggle][2], PlayerInfo[playerid][Name]);
+			mysql_query(gCon, query, false);
+		}
 	}
 
 	KillTimer(PlayerInfo[playerid][pTimer]);
@@ -195,6 +209,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
+	new string[128];
+
 	switch(dialogid)
 	{
 		case DIALOG_LOGIN:
@@ -226,7 +242,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(!response) return 1;
 
 			if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "Please be on foot to spawn a vehicle.");
-			new bool:found = false, string[128];
+			new bool:found = false;
 
 			for(new i = 0; i < sizeof(aVehicleNames); i++)
 			{
@@ -248,6 +264,124 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			if(!found)
 				SendClientMessage(playerid, COLOR_RED, "Couldn't find vehicle.");
+		}
+
+		case DIALOG_CPANEL:
+		{
+			if(!response) return 1;
+
+			switch(listitem)
+			{
+				case 0:	ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
+				case 1: ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+				case 2: SendRconCommand("gmx");
+			}
+		}
+
+		case DIALOG_CPANEL_PLAYERPANEL:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
+			new id = strval(inputtext);
+
+			if (!IsPlayerConnected(id))
+			{
+				SendClientMessage(playerid, COLOR_RED, "This user isn't online");	
+				return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
+			}
+
+			PlayerInfo[playerid][Selected_Id] = strval(inputtext);
+
+			//todo: 
+			// switch(GetPlayerLevel(playerid))
+			// {
+			// 	case LEVEL_TRIAL_MOD:
+			// 	case LEVEL_MOD:
+			// 	case LEVEL_TRIAL_ADMIN:
+			// 	case LEVEL_ADMIN:
+			// 	case LEVEL_OWNER:
+			// }
+			// format(string, sizeof(string), "Spectate\nGet\nGoto\n")
+
+			// ShowPlayerDialog(playerid, DIALOG_CPANEL_PLAYERPANEL_LIST, DIALOG_STYLE_LIST, "Options", string, "Select", "Cancel");
+
+			//from old:
+			// if (PlayerInfo[playerid][Level] == 3 || IsPlayerAdmin(playerid))
+			// {
+			// ShowPlayerDialog(playerid,5,2,"cPanel by {FF0A00}Michael@Belgium","        -=                ..::Extra Options::..                =- \r\nSpectate \r\nGet \r\nGoto \r\n        -=                   ..::Moderator::..                  =-\r\nMute \r\nUnmute \r\nFreeze \r\nUnfreeze \r\nJail \r\nUnjail \r\nKill \r\nKick \r\n        -=                ..::Administrator::..                =-  \r\nBan \r\nSetlevel","Select","Cancel");
+			// } else {
+			// ShowPlayerDialog(playerid,6,2,"cPanel by {FF0A00}Michael@Belgium","        -=                ..::Extra Options::..                =- \r\nSpectate \r\nGet \r\nGoto \r\n        -=                   ..::Moderator::..                  =-\r\nMute \r\nUnmute \r\nFreeze \r\nUnfreeze \r\nJail \r\nUnjail \r\nKill \r\nKick","Select","Cancel");
+			// }
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
+
+			switch(listitem)
+			{
+        		case 0:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_0,DIALOG_STYLE_INPUT, "Change gamemode","Please fill in your gamemode name.","OK","Cancel");
+        		case 1:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_1,DIALOG_STYLE_INPUT, "Load filterscript","Please fill in your filterscript name.","OK","Cancel");
+        		case 2:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_2,DIALOG_STYLE_INPUT, "Unload filterscript","Please fill in your filterscript name.","OK","Cancel");
+        		case 3:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_3,DIALOG_STYLE_INPUT, "Set hostname","Please fill in your hostname.","OK","Cancel");
+        		case 4:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_4,DIALOG_STYLE_INPUT, "Lock server","Please fill in your server password.","OK","Cancel");
+        		case 5:	ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL_5,DIALOG_STYLE_INPUT, "Set gamemodetext","Please fill in your gamemode text.","OK","Cancel");
+			}
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_0:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			format(string,sizeof(string),"changemode %s",inputtext);
+			SendRconCommand(string);
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_1:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			format(string,sizeof(string),"loadfs %s",inputtext);
+			SendRconCommand(string);
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_2:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			format(string,sizeof(string),"unloadfs %s",inputtext);
+			SendRconCommand(string);
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_3:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			format(string,sizeof(string),"hostname %s",inputtext);
+			SendRconCommand(string);
+
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed hostname to %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			SendClientMessageToAdmins(-1, string);
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_4:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			format(string,sizeof(string),"password %s",inputtext);
+			SendRconCommand(string);
+
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the password of the server.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+			SendClientMessageToAdmins(-1, string);
+		}
+
+		case DIALOG_CPANEL_SERVERPANEL_5:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_SERVERPANEL);
+
+			SetGameModeText(inputtext);
+
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the gamemodetext to %s.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			SendClientMessageToAdmins(-1, string);
 		}
 	}
 	return 1;

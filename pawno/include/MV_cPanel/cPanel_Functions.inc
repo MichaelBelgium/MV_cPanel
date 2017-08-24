@@ -14,7 +14,13 @@ ShowPlayerDialogEx(playerid,dialogid)
 			format(string, sizeof(string), COL_WHITE"Your user (%s) is "COL_RED"not"COL_WHITE" registered! Please "COL_BLUE"register"COL_WHITE" with a password below!", PlayerInfo[playerid][Name]);
 			ShowPlayerDialog(playerid, DIALOG_REGISTER, DIALOG_STYLE_PASSWORD, "Register", string, "Register", "");
 		}
+
+        case DIALOG_CPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Open player panel\nOpen server panel\nRestart server","Ok","Cancel");
+        case DIALOG_CPANEL_PLAYERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_PLAYERPANEL,DIALOG_STYLE_INPUT,"Player ID","Please fill in a PlayerID.","OK","Cancel");
+        case DIALOG_CPANEL_SERVERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Change gamemode \r\nLoad filterscript \r\nUnload filterscript \r\nSet hostname \r\nSet server password \r\nSet gamemodetext","Select","Back");
 	}
+
+    return 1;
 }
 
 SendClientMessageToAdmins(color, message[])
@@ -26,7 +32,9 @@ SendClientMessageToAdmins(color, message[])
     }
 }
 
-stock GetPlayerLevel(level)
+stock GetPlayerLevel(playerid) return PlayerInfo[playerid][Adminlevel];
+
+stock GetPlayerLevelEx(level)
 {
     new playerlevel[32];
     switch(level)
