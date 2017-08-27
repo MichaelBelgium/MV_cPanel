@@ -2,6 +2,7 @@
 #include <a_mysql>
 #include <sscanf2>
 #include <zcmd>
+#include <KickBan>
 #include <MV_cPanel/cPanel_Config>
 
 #define COL_RED		"{FF0000}"
