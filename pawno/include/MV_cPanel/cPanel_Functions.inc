@@ -32,6 +32,29 @@ SendClientMessageToAdmins(color, message[])
     }
 }
 
+stock SaveLog(logtype, player[], command[] = "", target[] = "", params[] = "")
+{
+	new tmptarget[MAX_PLAYER_NAME], tmpparams[64], tmpcommand[16];
+
+	if(isnull(target))
+		format(tmptarget, sizeof(tmptarget), "%s", "NULL");
+	else
+		mysql_format(gCon, tmptarget, sizeof(tmptarget), "'%e'", target);
+
+	if(isnull(params))
+		format(tmpparams, sizeof(tmpparams), "%s", "NULL");
+	else
+		mysql_format(gCon, tmpparams, sizeof(tmpparams), "'%e'", params);
+
+	if(isnull(command))
+		format(tmpcommand, sizeof(tmpcommand), "%s", "NULL");
+	else
+		mysql_format(gCon, tmpcommand, sizeof(tmpcommand), "'%e'", command);
+
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Player, Target, Command, Params) VALUES (%i, '%e', %s, %s, %s)", logtype, player, tmptarget, tmpcommand, tmpparams);
+	mysql_tquery(gCon, query);
+}
+
 stock GetPlayerLevel(playerid) return PlayerInfo[playerid][Adminlevel];
 
 stock GetPlayerLevelEx(level)
@@ -75,6 +98,12 @@ stock SetPlayerCash(playerid, money)
 }
 
 stock GetPlayerCash(playerid) return PlayerInfo[playerid][Money];
+stock GetPlayerNameEx(playerid)
+{
+    new name[MAX_PLAYER_NAME];
+    strins(name, PlayerInfo[playerid][Name], 0);
+    return name;
+}
 
 stock UnlockVehicle(vehicleid) 
 {

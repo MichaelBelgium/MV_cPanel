@@ -73,6 +73,13 @@ enum
 	LEVEL_OWNER
 };
 
+enum
+{
+	LOG_TYPE_CMDS,
+	LOG_TYPE_ACMDS,
+	LOG_TYPE_REPORTS
+};
+
 enum e_vInfo
 {
 	vName[24],
@@ -165,7 +172,7 @@ public OnPlayerConnect(playerid)
 	VipInfo[playerid][Toggle][2] = false;
 	PlayerInfo[playerid][pTimer][0] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
 
-	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
+	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", GetPlayerNameEx(playerid));
 	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
 	return 1;
 }
@@ -174,12 +181,12 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], PlayerInfo[playerid][Name]);
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], GetPlayerNameEx(playerid));
 		mysql_query(gCon, query, false);
 
 		if(IsPlayerVIP(playerid))
 		{
-			mysql_format(gCon, query, sizeof(query), "UPDATE Vips SET Toggle0 = %d, Toggle1 = %d, Toggle2 = %d WHERE Name = '%e'", VipInfo[playerid][Toggle][0], VipInfo[playerid][Toggle][1], VipInfo[playerid][Toggle][2], PlayerInfo[playerid][Name]);
+			mysql_format(gCon, query, sizeof(query), "UPDATE Vips SET Toggle0 = %d, Toggle1 = %d, Toggle2 = %d WHERE Name = '%e'", VipInfo[playerid][Toggle][0], VipInfo[playerid][Toggle][1], VipInfo[playerid][Toggle][2], GetPlayerNameEx(playerid));
 			mysql_query(gCon, query, false);
 		}
 	}
@@ -214,7 +221,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(!response) return ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
 
-			mysql_format(gCon, query, sizeof(query), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
+			mysql_format(gCon, query, sizeof(query), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, GetPlayerNameEx(playerid));
 			mysql_tquery(gCon, query, "OnPlayerLogin", "i", playerid);
 		}
 
@@ -222,7 +229,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(!response) return ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
 
-			mysql_format(gCon, query, sizeof(query), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
+			mysql_format(gCon, query, sizeof(query), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",GetPlayerNameEx(playerid), inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
 			mysql_query(gCon, query, false);
 
 			SendClientMessage(playerid, COLOR_GREEN, "Successfully registered.");			
@@ -245,7 +252,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					vehicle = CreateVehicle(aVehicleNames[i][vModel], pos[0], pos[1], pos[2], 0, -1, -1, -1);
 					PutPlayerInVehicle(playerid, vehicle, 0);
 
-					format(string, sizeof(string), COL_VIP_1"-[VIP]- "COL_VIP_2"%s (%i) has spawned a %s (%i)", PlayerInfo[playerid][Name], playerid, aVehicleNames[i][vName], aVehicleNames[i][vModel]);
+					format(string, sizeof(string), COL_VIP_1"-[VIP]- "COL_VIP_2"%s (%i) has spawned a %s (%i)", GetPlayerNameEx(playerid), playerid, aVehicleNames[i][vName], aVehicleNames[i][vModel]);
 					SendClientMessageToAll(-1, string);
 
 					found = true;
@@ -375,7 +382,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			format(string,sizeof(string),"hostname %s",inputtext);
 			SendRconCommand(string);
 
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed hostname to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed hostname to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), inputtext);
 			SendClientMessageToAdmins(-1, string);
 		}
 
@@ -386,7 +393,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			format(string,sizeof(string),"password %s",inputtext);
 			SendRconCommand(string);
 
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the password of the server.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the password of the server.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid));
 			SendClientMessageToAdmins(-1, string);
 		}
 
@@ -396,7 +403,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			SetGameModeText(inputtext);
 
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the gamemodetext to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the gamemodetext to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), inputtext);
 			SendClientMessageToAdmins(-1, string);
 		}
 	}
@@ -437,6 +444,15 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_RED, "Slow down at executing commands.");
 		return 0;
 	}
+	return 1;
+}
+
+public OnPlayerCommandPerformed(playerid, cmdtext[], success)
+{
+	#if LOG_COMMANDS
+	if(success)
+		SaveLog(LOG_TYPE_CMDS, GetPlayerNameEx(playerid), cmdtext);
+	#endif
 	return 1;
 }
 

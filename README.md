@@ -8,6 +8,7 @@ The script was originally created on 15/04/2011. Now this version will be a full
 * SQL plugin (R41-1 or higher)
 * ZCMD
 * sscanf
+* All the includes from the [include folder](https://github.com/MichaelBelgium/MV_cPanel/tree/master/pawno/include)
 
 ## Features
 * Login/Register system
@@ -23,16 +24,17 @@ I've put default values which are not that bad but you might think different abo
 If true, edit the config file and re-compile the filterscript.
 
 ```PAWN
-#define COOLDOWN_COMMAND	5	//time in seconds between command executes
-#define COOLDOWN_CHAT		2	//time in seconds between chat messages
-#define COOLDOWN_VIP_HEAL	600	//time in seconds between vip healing (/vipheal)
+#define COOLDOWN_COMMAND	5		//time in seconds between command executes
+#define COOLDOWN_CHAT		2		//time in seconds between chat messages
+#define COOLDOWN_VIP_HEAL	600		//time in seconds between vip healing (/vipheal)
 
 #define MAX_WARNINGS		5		//max warnings a player can have before he gets kicked/banned
 #define BAN_ON_WARN			false 	//if true, a player which reaches MAX_WARNINGS he'll get banned, else kicked.
 #define MUTE_EQUALS_NOCMDS	true 	//if true, a player that is muted won't be able to execute any commands either.
 #define ADMIN_SKIN			84		//the skinid of admins when u do /adminduty
 #define FREE_DIALOG_ID		100		//specify a dialogid that isn't used by your gamemode
+
+#define LOG_COMMANDS		false 	//Log ALL commands.
+#define LOG_ADMINCOMMANDS	true 	//log admin commands with all the info they give (almost the same like LOG_COMMANDS but u get more info in the db)
+#define LOG_REPORTS			true 	//log all the reports that have been sent to admins
 ```
-
-## Media
-

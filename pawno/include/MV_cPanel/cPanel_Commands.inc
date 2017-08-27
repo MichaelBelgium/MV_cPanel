@@ -23,9 +23,9 @@ CMD:stats(playerid,params[])
 
 	if(sscanf(params, "i", id))
 	{
-		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[playerid][Name], playerid);
+		format(title, sizeof(title), "Stats of %s (%i)", GetPlayerNameEx(playerid), playerid);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[playerid][Name], playerid, GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerLevel(playerid), IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", GetPlayerNameEx(playerid), playerid, GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerLevel(playerid), IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[playerid][Kills],  PlayerInfo[playerid][Deaths], GetPlayerScore(playerid), GetPlayerCash(playerid));
@@ -38,9 +38,9 @@ CMD:stats(playerid,params[])
 	{
 		if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
-		format(title, sizeof(title), "Stats of %s (%i)", PlayerInfo[id][Name], id);
+		format(title, sizeof(title), "Stats of %s (%i)", GetPlayerNameEx(id), id);
 
-		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", PlayerInfo[id][Name], id, GetPlayerLevelEx(GetPlayerLevel(id)), GetPlayerLevel(id), IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
+		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", GetPlayerNameEx(id), id, GetPlayerLevelEx(GetPlayerLevel(id)), GetPlayerLevel(id), IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[id][Kills], PlayerInfo[id][Deaths], GetPlayerScore(id), GetPlayerCash(id));
@@ -84,10 +84,13 @@ CMD:report(playerid, params[])
 	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /report [playerid] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This playerid is not online.");
 
-	format(string, sizeof(string), "Incomming report! %s (%i) about %s (%i): %s", PlayerInfo[playerid][Name], playerid, PlayerInfo[id][Name], id, reason);
+	format(string, sizeof(string), "Incomming report! %s (%i) about %s (%i): %s", GetPlayerNameEx(playerid), playerid, GetPlayerNameEx(id), id, reason);
 	SendClientMessageToAdmins(COLOR_RED, string);
 
 	SendClientMessage(playerid,COLOR_RED,"Your report has been sent to all online administrators.");
+	#if LOG_REPORTS
+		SaveLog(LOG_TYPE_REPORTS, GetPlayerNameEx(playerid), "", GetPlayerNameEx(id), reason);
+	#endif
 	return 1;
 }
 
@@ -110,7 +113,7 @@ CMD:a(playerid, params[])
 	new msg[128], string[256];
 	if(sscanf(params, "s[128]", msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /a(chat) [message]");
 
-	format(string, sizeof(string), COL_ADMIN_1"%s %s (%i):"COL_ADMIN_2" %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], playerid, msg);
+	format(string, sizeof(string), COL_ADMIN_1"%s %s (%i):"COL_ADMIN_2" %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), playerid, msg);
 	SendClientMessageToAdmins(-1, string);
 	return 1;
 }
@@ -134,7 +137,7 @@ CMD:warn(playerid, params[])
 			format(string, sizeof(string), "%i %s", id, "Reached max warns");
 			cmd_ban(playerid, string);
 		#else
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has auto-kicked %s (%i) for receiving >= %i warnings, last: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, MAX_WARNINGS, reason);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has auto-kicked %s (%i) for receiving >= %i warnings, last: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, MAX_WARNINGS, reason);
 			SendClientMessageToAll(-1, string);
 
 			format(string, sizeof(string), "You've been kicked for having %i or more warnings, behave better in the future!", MAX_WARNINGS);
@@ -146,12 +149,16 @@ CMD:warn(playerid, params[])
 	}
 	else
 	{
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"warned %s (%i) for %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"warned %s (%i) for %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
 		SendClientMessageToAdmins(-1, string);
 
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has warned you for: %s (%i/%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], reason, PlayerInfo[id][Warns], MAX_WARNINGS);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has warned you for: %s (%i/%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), reason, PlayerInfo[id][Warns], MAX_WARNINGS);
 		SendClientMessage(id, -1, string);
 	}
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "warn", GetPlayerNameEx(id), reason);
+	#endif
 	return 1;
 }
 
@@ -162,6 +169,10 @@ CMD:asay(playerid, params[])
 	if(sscanf(params, "s[128]", msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /asay [message]");
 	format(string, sizeof(string), COL_ADMIN_1"-[Staff message]- "COL_ADMIN_2"%s", msg);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "asay", "", msg);
+	#endif
 	return 1;
 }
 
@@ -176,8 +187,12 @@ CMD:eject(playerid, params[])
 
 	RemovePlayerFromVehicle(id);
 
-	format(string,sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"ejected %s (%i) from their vehicle.",GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string,sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"ejected %s (%i) from their vehicle.",GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "eject", GetPlayerNameEx(id), reason);
+	#endif
 	return 1;
 }
 
@@ -190,11 +205,15 @@ CMD:mute(playerid, params[])
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	PlayerInfo[id][Muted] = minutes;
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, minutes, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, minutes, reason);
 	SendClientMessageToAll(-1, string);
 
 	KillTimer(PlayerInfo[id][pTimer][1]);
 	PlayerInfo[id][pTimer][1] = SetTimerEx("UnmuteTimer", PlayerInfo[id][Muted]*60*1000, false, "i", id);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "mute", GetPlayerNameEx(id), params);
+	#endif
 	return 1;
 }
 
@@ -208,8 +227,12 @@ CMD:unmute(playerid, params[])
 
 	UnmuteTimer(id);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unmuted %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unmuted %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "unmute", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -224,8 +247,12 @@ CMD:slap(playerid, params[])
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
 	SetPlayerPos(id, pos[0], pos[1], pos[2] + height);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has slapped %s (%i)",GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has slapped %s (%i)",GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "slap", GetPlayerNameEx(id), params);
+	#endif
 	return 1;
 }
 
@@ -237,7 +264,7 @@ CMD:spectate(playerid, params[])
 	if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
 	{
 		TogglePlayerSpectating(playerid, false);
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"stopped spectating", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"stopped spectating", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid));
 		SendClientMessageToAdmins(-1, string);
 		return 1;
 	}
@@ -251,10 +278,14 @@ CMD:spectate(playerid, params[])
 	else
 		PlayerSpectatePlayer(playerid, id);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"started spectating %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"started spectating %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAdmins(-1, string);
 
 	SendClientMessage(playerid, COLOR_RED, "Use /spectate again to stop spectating.");
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "spectate", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -269,8 +300,12 @@ CMD:disarm(playerid, params[])
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	ResetPlayerWeapons(id);
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_1"disarmed %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_1"disarmed %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "disarm", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -283,16 +318,20 @@ CMD:adminduty(playerid, params[])
 	{
 		SetPlayerSkin(playerid, PlayerInfo[playerid][OldSkin]);
 		PlayerInfo[playerid][OldSkin] = -1;
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"now off duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"now off duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid));
 		SendClientMessageToAdmins(-1, string);
 	}
 	else
 	{
 		PlayerInfo[playerid][OldSkin] = GetPlayerSkin(playerid);
 		SetPlayerSkin(playerid, ADMIN_SKIN);
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"now on duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"now on duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid));
 		SendClientMessageToAdmins(-1, string);
 	}
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "adminduty");
+	#endif
 	return 1;
 }
 
@@ -304,8 +343,12 @@ CMD:announce(playerid, params[])
 	if(sscanf(params, "s[64]", text)) return SendClientMessage(playerid, COLOR_RED, "Usage: /announce [text]");
 	GameTextForAll(text, 2500, 3);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"announced '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], text);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"announced '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), text);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "announce", "", text);
+	#endif
 	return 1;
 }
 
@@ -318,8 +361,12 @@ CMD:akill(playerid, params[])
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerHealth(id, 0.0);
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"killed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"killed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "akill", GetPlayerNameEx(id), params);
+	#endif
 	return 1;
 }
 
@@ -331,10 +378,14 @@ CMD:kick(playerid, params[])
 	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /kick [playerid] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
 	SendClientMessageToAll(-1, string);
 
 	Kick(id);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "kick", GetPlayerNameEx(id), params);
+	#endif
 	return 1;
 }
 
@@ -351,8 +402,12 @@ CMD:jail(playerid, params[])
 	SetPlayerPos(id, 264.6288,77.5742,1001.0391);
 	TogglePlayerControllable(id, false);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"jailed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"jailed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "jail", GetPlayerNameEx(id), params);
+	#endif
 	return 1;
 }
 
@@ -368,8 +423,12 @@ CMD:unjail(playerid, params[])
 	TogglePlayerControllable(id, true);
 	SpawnPlayer(id);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unjailed %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unjailed %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "unjail", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -388,8 +447,12 @@ CMD:freeze(playerid, params[])
 
 	TogglePlayerControllable(id, false);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"froze %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"froze %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "freeze", GetPlayerNameEx(id), reason);
+	#endif
 	return 1;
 }
 
@@ -402,8 +465,12 @@ CMD:unfreeze(playerid, params[])
 
 	TogglePlayerControllable(id, true);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unfroze %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unfroze %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "unfreeze", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -417,8 +484,12 @@ CMD:burn(playerid, params[])
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
 	CreateExplosion(pos[0], pos[1], pos[2]+3.0, 1, 10.0);
 	
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"burned %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"burned %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "burn", GetPlayerNameEx(id));
+	#endif
 	return 1;
 }
 
@@ -434,8 +505,12 @@ CMD:ajetpack(playerid, params[])
 	new string[128];
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"spawned a jetpack.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"spawned a jetpack.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid));
 	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "ajetpack");
+	#endif
 	return 1;
 }
 
@@ -662,12 +737,12 @@ CMD:makevip(playerid,params[])
 
 	if(duration == 0)
 	{
-		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', 0)",PlayerInfo[id][Name]);
+		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', 0)",GetPlayerNameEx(id));
 		format(string, sizeof(string), "ever.");
 	}
 	else
 	{
-		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL + %d MONTH)))",PlayerInfo[id][Name],duration);
+		mysql_format(gCon, query,sizeof(query),"INSERT INTO Vips (Name,Duration) VALUES ('%e', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL + %d MONTH)))",GetPlayerNameEx(id),duration);
 		format(string, sizeof(string), "%i months.", duration);
 	}
 
@@ -675,21 +750,21 @@ CMD:makevip(playerid,params[])
 
 	VipInfo[id][Duration] = duration; //as long as it's not -1 it's fine.
 
-	format(string, sizeof(string),  COL_VIP_1"-[VIP]-"COL_VIP_2" %s has made you a VIP! You are vip for %s", PlayerInfo[playerid][Name], string);
+	format(string, sizeof(string),  COL_VIP_1"-[VIP]-"COL_VIP_2" %s has made you a VIP! You are vip for %s", GetPlayerNameEx(playerid), string);
 	SendClientMessage(id, -1, string);
 	return 1;
 }
 
 CMD:removevip(playerid, params[])
 {
-	if(GetPlayerLevel(playerid) != LEVEL_OWNER) return 0;
+	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 
 	new id;
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /removevip [playerid]");
 	if(!IsPlayerVIP(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't vip");
 
 	VipInfo[id][Duration] = -1;
-	mysql_format(gCon, query, sizeof(query), "DELETE FROM Vips WHERE Name = '%e'", PlayerInfo[id][Name]);
+	mysql_format(gCon, query, sizeof(query), "DELETE FROM Vips WHERE Name = '%e'", GetPlayerNameEx(id));
 	mysql_tquery(gCon, query);
 
 	SendClientMessage(id, -1, COL_VIP_1"-[VIP]-"COL_VIP_2" Your vip status has been removed.");

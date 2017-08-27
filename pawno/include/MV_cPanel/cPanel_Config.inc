@@ -17,3 +17,7 @@
 #define MUTE_EQUALS_NOCMDS	true 	//if true, a player that is muted won't be able to execute any commands either.
 #define ADMIN_SKIN			84		//the skinid of admins when u do /adminduty
 #define FREE_DIALOG_ID		100		//specify a dialogid that isn't used by your gamemode
+
+#define LOG_COMMANDS		false 	//Log ALL commands.
+#define LOG_ADMINCOMMANDS	true 	//log admin commands with all the info they give (almost the same like LOG_COMMANDS but u get more info in the db)
+#define LOG_REPORTS			true 	//log all the reports that have been sent to admins

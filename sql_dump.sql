@@ -1,4 +1,23 @@
 --
+-- Table structure for table `Logs`
+--
+
+CREATE TABLE IF NOT EXISTS `Logs` (
+  `lID` int(11) NOT NULL AUTO_INCREMENT,
+  `Type` tinyint(4) NOT NULL,
+  `Player` varchar(24) NOT NULL,
+  `Target` varchar(24) DEFAULT NULL,
+  `Command` varchar(32) DEFAULT NULL,
+  `Params` varchar(64) DEFAULT NULL,
+  `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`lID`),
+  KEY `Player` (`Player`),
+  KEY `Target` (`Target`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Players`
 --
 
@@ -17,7 +36,6 @@ CREATE TABLE IF NOT EXISTS `Players` (
   PRIMARY KEY (`Playername`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
 -- --------------------------------------------------------
 
 --
@@ -33,6 +51,17 @@ CREATE TABLE IF NOT EXISTS `Vips` (
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `Name` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `Logs`
+--
+ALTER TABLE `Logs`
+  ADD CONSTRAINT `Logs_ibfk_1` FOREIGN KEY (`Player`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `Logs_ibfk_2` FOREIGN KEY (`Target`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Constraints for table `Vips`
