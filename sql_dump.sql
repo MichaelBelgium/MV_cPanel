@@ -1,5 +1,3 @@
--- --------------------------------------------------------
-
 --
 -- Table structure for table `Players`
 --
@@ -12,11 +10,13 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Adminlevel` tinyint(4) NOT NULL DEFAULT '0',
   `Kills` int(11) NOT NULL DEFAULT '0',
   `Deaths` int(11) NOT NULL DEFAULT '0',
+  `Warnings` tinyint(4) NOT NULL DEFAULT '0',
   `OnlineTime` int(11) NOT NULL DEFAULT '0',
   `rIP` varchar(16) NOT NULL COMMENT 'Registered IP',
   `lIP` varchar(16) NOT NULL COMMENT 'Last IP',
   PRIMARY KEY (`Playername`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 -- --------------------------------------------------------
 
@@ -33,10 +33,6 @@ CREATE TABLE IF NOT EXISTS `Vips` (
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `Name` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Constraints for dumped tables
---
 
 --
 -- Constraints for table `Vips`
