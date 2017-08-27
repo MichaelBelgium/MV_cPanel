@@ -50,6 +50,7 @@ stock GetPlayerLevelEx(level)
 
 stock IsPlayerVIP(playerid) return VipInfo[playerid][Duration] != -1;
 stock IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
+stock IsPlayerMuted(playerid) return PlayerInfo[playerid][Muted] > 0;
 
 stock GivePlayerScore(playerid, score)
 {

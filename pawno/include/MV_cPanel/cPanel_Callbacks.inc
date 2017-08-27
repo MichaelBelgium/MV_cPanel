@@ -2,6 +2,7 @@ forward OnAccountCheck(playerid);
 forward OnVipLoaded(playerid);
 forward OnPlayerLogin(playerid);
 forward PlayerTimer(playerid);
+forward UnmuteTimer(playerid);
 
 public OnAccountCheck(playerid)
 {
@@ -49,6 +50,7 @@ public OnPlayerLogin(playerid)
 		cache_get_value_name_int(0, "Kills", PlayerInfo[playerid][Kills]);
 		cache_get_value_name_int(0, "Deaths", PlayerInfo[playerid][Deaths]);
 		cache_get_value_name_int(0, "OnlineTime", PlayerInfo[playerid][OnlineTime]);
+		cache_get_value_name_int(0, "Warnings", PlayerInfo[playerid][Warns]);
 
 		ResetPlayerMoney(playerid);
 		SetPlayerCash(playerid, PlayerInfo[playerid][Money]);
@@ -73,4 +75,15 @@ public PlayerTimer(playerid)
 		GetVehicleHealth(veh, vhealth);
 		if(vhealth <= 300) RepairVehicle(veh);
 	}
+}
+
+public UnmuteTimer(playerid)
+{
+	KillTimer(PlayerInfo[playerid][pTimer][1]);
+
+	new string[128];
+	format(string, sizeof(string), "You have been unmuted after %i minutes", PlayerInfo[playerid][Muted]);
+	SendClientMessage(playerid, COLOR_GREEN, string);
+
+	PlayerInfo[playerid][Muted] = 0;
 }

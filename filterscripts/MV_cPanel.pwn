@@ -27,6 +27,11 @@
 #define COOLDOWN_CHAT		2	//time in seconds between chat messages
 #define COOLDOWN_VIP_HEAL	600	//time in seconds between vip healing (/vipheal)
 
+#define MAX_WARNINGS		5		//max warnings a player can have before he gets kicked/banned
+#define BAN_ON_WARN			false 	//if true, a player which reaches MAX_WARNINGS he'll get banned, else kicked.
+#define MUTE_EQUALS_NOCMDS	true 	//if true, a player that is muted won't be able to execute any commands either.
+#define ADMIN_SKIN			84		//the skinid of admins when u do /adminduty
+
 new MySQL:gCon;
 
 enum
@@ -43,7 +48,8 @@ enum
 	DIALOG_CPANEL_SERVERPANEL_2,
 	DIALOG_CPANEL_SERVERPANEL_3,
 	DIALOG_CPANEL_SERVERPANEL_4,
-	DIALOG_CPANEL_SERVERPANEL_5
+	DIALOG_CPANEL_SERVERPANEL_5,
+	DIALOG_CPANEL_PLAYERPANEL_LIST
 };
 
 enum gPlayerInfo
@@ -57,9 +63,11 @@ enum gPlayerInfo
 	Kills,
 	OnlineTime,
 	Tick[3], //0 = commands, 1 = chat, 2 = vip heal
-	pTimer,
+	pTimer[2], //0 = PlayerTimer, 1 = MuteTimer
 	Selected_Id,
-	Warns
+	Warns,
+	Muted,
+	OldSkin
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -163,13 +171,15 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Deaths] =
 	PlayerInfo[playerid][OnlineTime] = 
 	PlayerInfo[playerid][Warns] =
+	PlayerInfo[playerid][Muted] =
 	PlayerInfo[playerid][Adminlevel] = 0;
 	PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
+	PlayerInfo[playerid][OldSkin] =
 	VipInfo[playerid][Duration] = -1;
 	VipInfo[playerid][Toggle][0] =
 	VipInfo[playerid][Toggle][1] =
 	VipInfo[playerid][Toggle][2] = false;
-	PlayerInfo[playerid][pTimer] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
+	PlayerInfo[playerid][pTimer][0] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
 
 	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", PlayerInfo[playerid][Name]);
 	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
@@ -180,7 +190,7 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000,  PlayerInfo[playerid][Name]);
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], PlayerInfo[playerid][Name]);
 		mysql_query(gCon, query, false);
 
 		if(IsPlayerVIP(playerid))
@@ -190,7 +200,8 @@ public OnPlayerDisconnect(playerid, reason)
 		}
 	}
 
-	KillTimer(PlayerInfo[playerid][pTimer]);
+	KillTimer(PlayerInfo[playerid][pTimer][0]);
+	KillTimer(PlayerInfo[playerid][pTimer][1]);
 	return 1;
 }
 
@@ -217,26 +228,20 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		case DIALOG_LOGIN:
 		{
-			if(!response) 
-				ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
-			else
-			{
-				mysql_format(gCon, query, sizeof(query), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
-				mysql_tquery(gCon, query, "OnPlayerLogin", "i", playerid);
-			}
+			if(!response) return ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
+
+			mysql_format(gCon, query, sizeof(query), "SELECT * FROM Players WHERE Password = SHA2('%e', 512) AND Playername = '%e'", inputtext, PlayerInfo[playerid][Name]);
+			mysql_tquery(gCon, query, "OnPlayerLogin", "i", playerid);
 		}
 
 		case DIALOG_REGISTER:
 		{
-			if(!response)
-				ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
-			else
-			{
-				mysql_format(gCon, query, sizeof(query), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
-				mysql_query(gCon, query, false);
+			if(!response) return ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
 
-				SendClientMessage(playerid, COLOR_GREEN, "Successfully registered.");
-			}
+			mysql_format(gCon, query, sizeof(query), "INSERT INTO Players (Playername, Password, rIP, lIP) VALUES ('%e', SHA2('%e', 512), '%s', '%s')",PlayerInfo[playerid][Name], inputtext, PlayerInfo[playerid][IP], PlayerInfo[playerid][IP]);
+			mysql_query(gCon, query, false);
+
+			SendClientMessage(playerid, COLOR_GREEN, "Successfully registered.");			
 		}
 
 		case DIALOG_VIP_VEH:
@@ -283,7 +288,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		case DIALOG_CPANEL_PLAYERPANEL:
 		{
 			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
-			if(!IsNumeric(inputtext)) 
+			if(!IsNumeric(inputtext) || isnull(inputtext)) 
 			{
 				SendClientMessage(playerid, COLOR_RED, "Please enter a playerid.");
 				return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
@@ -299,26 +304,45 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			PlayerInfo[playerid][Selected_Id] = strval(inputtext);
 
-			//todo: 
-			// switch(GetPlayerLevel(playerid))
-			// {
-			// 	case LEVEL_TRIAL_MOD:
-			// 	case LEVEL_MOD:
-			// 	case LEVEL_TRIAL_ADMIN:
-			// 	case LEVEL_ADMIN:
-			// 	case LEVEL_OWNER:
-			// }
-			// format(string, sizeof(string), "Spectate\nGet\nGoto\n")
+			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(string,"Spectate\nGet\nGoto\n(Un)Mute\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(string,"Freeze\nUnfreeze\nJail\nUnjail\nKill\nKick\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(string, "Ban\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(string, "Set level");
 
-			// ShowPlayerDialog(playerid, DIALOG_CPANEL_PLAYERPANEL_LIST, DIALOG_STYLE_LIST, "Options", string, "Select", "Cancel");
+			ShowPlayerDialog(playerid, DIALOG_CPANEL_PLAYERPANEL_LIST, DIALOG_STYLE_LIST, "Options", string, "Select", "Cancel");
+		}
 
-			//from old:
-			// if (PlayerInfo[playerid][Level] == 3 || IsPlayerAdmin(playerid))
-			// {
-			// ShowPlayerDialog(playerid,5,2,"cPanel by {FF0A00}Michael@Belgium","        -=                ..::Extra Options::..                =- \r\nSpectate \r\nGet \r\nGoto \r\n        -=                   ..::Moderator::..                  =-\r\nMute \r\nUnmute \r\nFreeze \r\nUnfreeze \r\nJail \r\nUnjail \r\nKill \r\nKick \r\n        -=                ..::Administrator::..                =-  \r\nBan \r\nSetlevel","Select","Cancel");
-			// } else {
-			// ShowPlayerDialog(playerid,6,2,"cPanel by {FF0A00}Michael@Belgium","        -=                ..::Extra Options::..                =- \r\nSpectate \r\nGet \r\nGoto \r\n        -=                   ..::Moderator::..                  =-\r\nMute \r\nUnmute \r\nFreeze \r\nUnfreeze \r\nJail \r\nUnjail \r\nKill \r\nKick","Select","Cancel");
-			// }
+		case DIALOG_CPANEL_PLAYERPANEL_LIST:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
+			if(PlayerInfo[playerid][Selected_Id] == INVALID_PLAYER_ID) return 1;
+
+			new id[4];
+			valstr(id, PlayerInfo[playerid][Selected_Id]);
+
+			switch(listitem)
+			{
+				case 0: cmd_spectate(playerid, id);
+				case 1: cmd_get(playerid, id);
+				case 2: cmd_goto(playerid, id);
+				case 3: 
+				{
+					if(IsPlayerMuted(PlayerInfo[playerid][Selected_Id]))
+						cmd_unmute(playerid, id);
+					else
+						cmd_mute(playerid, id); //needs reason
+				}
+				case 4: cmd_freeze(playerid, id);
+				case 5: cmd_unfreeze(playerid, id);
+				case 6: cmd_jail(playerid, id); //needs reason
+				case 7: cmd_unjail(playerid, id);
+				case 8: cmd_akill(playerid, id); //needs reason
+				case 9: cmd_kick(playerid, id); //needs reason
+				case 10: cmd_ban(playerid, id); //needs reason
+				case 11: cmd_setlevel(playerid, id); //needs level
+			}
+
+			PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
 		}
 
 		case DIALOG_CPANEL_SERVERPANEL:
@@ -367,7 +391,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			format(string,sizeof(string),"hostname %s",inputtext);
 			SendRconCommand(string);
 
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed hostname to %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed hostname to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
 			SendClientMessageToAdmins(-1, string);
 		}
 
@@ -388,7 +412,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			SetGameModeText(inputtext);
 
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the gamemodetext to %s.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2" changed the gamemodetext to '%s'.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], inputtext);
 			SendClientMessageToAdmins(-1, string);
 		}
 	}
@@ -412,6 +436,16 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 public OnPlayerCommandReceived(playerid, cmdtext[])
 {
+	#if MUTE_EQUALS_NOCMDS
+		if(IsPlayerMuted(playerid))
+		{
+			new string[128];
+			format(string, sizeof(string), "You are muted for %i minute%s", PlayerInfo[playerid][Muted], PlayerInfo[playerid][Muted] != 1 ? ("s") : (""));
+			SendClientMessage(playerid, COLOR_RED, string);
+			return 0;
+		}
+	#endif
+
 	if(GetTickCount() - PlayerInfo[playerid][Tick][0] > COOLDOWN_COMMAND*1000)
 		PlayerInfo[playerid][Tick][0] = GetTickCount();
 	else
@@ -424,6 +458,14 @@ public OnPlayerCommandReceived(playerid, cmdtext[])
 
 public OnPlayerText(playerid, text[])
 {
+	if(IsPlayerMuted(playerid))
+	{
+		new string[128];
+		format(string, sizeof(string), "You are muted for %i minute%s", PlayerInfo[playerid][Muted], PlayerInfo[playerid][Muted] != 1 ? ("s") : (""));
+		SendClientMessage(playerid, COLOR_RED, string);
+		return 0;
+	}
+
 	if(GetTickCount() - PlayerInfo[playerid][Tick][1] > COOLDOWN_CHAT*1000)
 		PlayerInfo[playerid][Tick][1] = GetTickCount();
 	else

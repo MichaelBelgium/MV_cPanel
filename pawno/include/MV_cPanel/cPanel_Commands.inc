@@ -5,8 +5,8 @@ CMD:cmds(playerid,params[])
 	strcat(cmds, "General:\nstats admins report\n\n");
 
 	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay crew eject mute unmute weaponids slap spectate disarm adminduty\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail facepunch freeze unfreeze burn crash ajetpack\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail facepunch freeze unfreeze burn crash ajetpack akill\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\ncage uncage get goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip\n");
@@ -92,7 +92,7 @@ CMD:report(playerid, params[])
 // ================= ADMIN COMMANDS ===========================
 CMD:cpanel(playerid, params[])
 {
-	if(IsPlayerAdmin(playerid))
+	if(IsPlayerAdmin(playerid) && !IsPlayerAdminEx(playerid, LEVEL_OWNER))
 	{
 		PlayerInfo[playerid][Adminlevel] = LEVEL_OWNER;
 		SendClientMessage(playerid, COLOR_GREEN, "Server assigned you as an owner (level 5)");
@@ -118,71 +118,183 @@ CMD:achat(playerid, params[]) return cmd_a(playerid, params);
 CMD:warn(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new id, reason[64], string[128];
+	if(sscanf(params, "is[64]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /warn [playerid] [reason]");
+
+	PlayerInfo[id][Warns]++;
+
+	if(PlayerInfo[id][Warns] >= MAX_WARNINGS)
+	{
+		#if BAN_ON_WARN
+			PlayerInfo[id][Warns] = 0;
+
+			format(string, sizeof(string), "%i %s", id, "Reached max warns");
+			cmd_ban(playerid, string);
+		#else
+			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has auto-kicked %s (%i) for receiving >= %i warnings, last: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, MAX_WARNINGS, reason);
+			SendClientMessageToAll(-1, string);
+
+			format(string, sizeof(string), "You've been kicked for having %i or more warnings, behave better in the future!", MAX_WARNINGS);
+			SendClientMessage(id, COLOR_RED, string);
+
+			PlayerInfo[id][Warns] = 0;
+			Kick(id);
+		#endif
+	}
+	else
+	{
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"warned %s (%i) for %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, reason);
+		SendClientMessageToAdmins(-1, string);
+
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has warned you for: %s (%i/%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], reason, PlayerInfo[id][Warns], MAX_WARNINGS);
+		SendClientMessage(id, -1, string);
+	}
 	return 1;
 }
 
 CMD:asay(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
-	return 1;
-}
-
-CMD:crew(playerid, params[])
-{
-	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new msg[128], string[256];
+	if(sscanf(params, "s[128]", msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /asay [message]");
+	format(string, sizeof(string), COL_ADMIN_1"-[Staff message]- "COL_ADMIN_2"%s", msg);
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
 CMD:eject(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+
+	new id, reason[64], string[128];
+	if(sscanf(params, "iS(No reason specified)[64]", id, reason)) return SendClientMessage(playerid, -1, "Usage: /eject [playerid] [Optional: reason]");
+	if(!IsPlayerInAnyVehicle(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't in any vehicle.");
+
+	RemovePlayerFromVehicle(id);
+
+	format(string,sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"ejected %s (%i) from their vehicle.",GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
 CMD:mute(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new id, minutes, reason[32], string[128];
+
+	if(sscanf(params, "iI(3)S(Spamming)[32]", id, minutes, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /mute [playerid] [Optional: minutes (= 3)] [Optional: reason]");
+
+	PlayerInfo[id][Muted] = minutes;
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id, minutes, reason);
+	SendClientMessageToAll(-1, string);
+
+	KillTimer(PlayerInfo[id][pTimer][1]);
+	PlayerInfo[id][pTimer][1] = SetTimerEx("UnmuteTimer", PlayerInfo[id][Muted]*60*1000, false, "i", id);
 	return 1;
 }
 
 CMD:unmute(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
-	return 1;
-}
+	new id, string[128];
+	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unmute [playerid]");
+	if(!IsPlayerMuted(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not muted.");
 
-CMD:weaponids(playerid, params[])
-{
-	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	UnmuteTimer(id);
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unmuted %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
 CMD:slap(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new id, Float:height, string[128], Float:pos[3];
+
+	if(sscanf(params, "iF(10.0)", id, height)) return SendClientMessage(playerid, COLOR_RED, "Usage: /slap [playerid] [Optional: height (= 10)]");
+
+	GetPlayerPos(id, pos[0], pos[1], pos[2]);
+	SetPlayerPos(id, pos[0], pos[1], pos[2] + height);
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has slapped %s (%i)",GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
 CMD:spectate(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new id, string[128];
+
+	if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
+	{
+		TogglePlayerSpectating(playerid, false);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"stopped spectating", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		SendClientMessageToAdmins(-1, string);
+		return 1;
+	}
+
+	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spectate [playerid]");
+
+	TogglePlayerSpectating(playerid, true);
+	if(IsPlayerInAnyVehicle(id))
+		PlayerSpectateVehicle(playerid, GetPlayerVehicleID(id));
+	else
+		PlayerSpectatePlayer(playerid, id);
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"started spectating %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	SendClientMessageToAdmins(-1, string);
+
+	SendClientMessage(playerid, COLOR_RED, "Use /spectate again to stop spectating.");
 	return 1;
 }
+
+CMD:spec(playerid, params[]) return cmd_spectate(playerid, params);
 
 CMD:disarm(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new id, string[128];
+
+	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /disarm [playerid]");
+	ResetPlayerWeapons(id);
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_1"disarmed %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name], PlayerInfo[id][Name], id);
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
 CMD:adminduty(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+
+	new string[128];
+	if(GetPlayerSkin(playerid) == ADMIN_SKIN)
+	{
+		SetPlayerSkin(playerid, PlayerInfo[playerid][OldSkin]);
+		PlayerInfo[playerid][OldSkin] = -1;
+		format(string, sizeof(string), "-[%s: %s]- now off duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		SendClientMessageToAdmins(-1, string);
+	}
+	else
+	{
+		PlayerInfo[playerid][OldSkin] = GetPlayerSkin(playerid);
+		SetPlayerSkin(playerid, ADMIN_SKIN);
+		format(string, sizeof(string), "-[%s: %s]- now on duty.", GetPlayerLevelEx(GetPlayerLevel(playerid)), PlayerInfo[playerid][Name]);
+		SendClientMessageToAdmins(-1, string);
+	}
 	return 1;
 }
 
 
 CMD:announce(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	return 1;
+}
+
+CMD:akill(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	return 1;
