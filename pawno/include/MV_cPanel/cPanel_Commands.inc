@@ -548,6 +548,15 @@ CMD:goto(playerid, params[])
 CMD:ban(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	new id, reason[32];
+
+	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /ban [playerid] [reason]");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
+	BanPlayer(id, playerid, reason);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "ban", GetPlayerNameEx(id), reason);
+	#endif
 	return 1;
 }
 

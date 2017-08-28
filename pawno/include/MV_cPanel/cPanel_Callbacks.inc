@@ -1,4 +1,5 @@
 forward OnAccountCheck(playerid);
+forward OnBanCheck(playerid);
 forward OnVipLoaded(playerid);
 forward OnPlayerLogin(playerid);
 forward PlayerTimer(playerid);
@@ -10,6 +11,53 @@ public OnAccountCheck(playerid)
 		ShowPlayerDialogEx(playerid,DIALOG_LOGIN);
 	else
 		ShowPlayerDialogEx(playerid,DIALOG_REGISTER);
+}
+
+public OnBanCheck(playerid)
+{
+	if(cache_num_rows() >= 1)
+	{
+		new banned[256*3], string[128], data[5][32], bID;
+
+		cache_get_value_name_int(0, "bID", bID);
+		cache_get_value_name(0, "Player", data[0]);
+		cache_get_value_name(0, "Admin", data[1]);
+		cache_get_value_name(0, "Reason", data[2]);
+		cache_get_value_name(0, "IP", data[3]);
+		cache_get_value_name(0, "Date", data[4]);
+
+		strcat(banned, "You are banned from this server.\n\n");
+
+		format(string, sizeof(string), "ID: %i\n", bID);
+		strcat(banned, string);
+
+		format(string, sizeof(string), "Name: %s\n", data[0]);
+		strcat(banned, string);
+
+		format(string, sizeof(string), "Banned by: %s\n", data[1]);
+		strcat(banned, string);
+
+		format(string, sizeof(string), "Reason: %s\n", data[2]);
+		strcat(banned, string);
+
+		format(string, sizeof(string), "IP: %s\n", data[3]);
+		strcat(banned, string);
+
+		format(string, sizeof(string), "Date: %s\n", data[4]);
+		strcat(banned, string);
+
+		ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Banned", banned, "OK", "");
+
+		format(string, sizeof(string), COL_ADMIN_1"-[Server]- "COL_ADMIN_2"Denied connection to %s. Banned: %s - %s - %s (%i)", GetPlayerNameEx(playerid), data[0], data[3], data[2], bID);
+		SendClientMessageToAdmins(-1, string);
+
+		Kick(playerid);
+	}
+	else
+	{
+		mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", GetPlayerNameEx(playerid));
+		mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
+	}
 }
 
 public OnVipLoaded(playerid)
@@ -74,6 +122,11 @@ public PlayerTimer(playerid)
 
 		GetVehicleHealth(veh, vhealth);
 		if(vhealth <= 300) RepairVehicle(veh);
+	}
+
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD) && GetPlayerSpecialAction(playerid) == SPECIAL_ACTION_USEJETPACK)
+	{
+		BanPlayer(playerid, INVALID_PLAYER_ID, "Jetpack");
 	}
 }
 

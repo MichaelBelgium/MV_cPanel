@@ -16,6 +16,7 @@ The script was originally created on 15/04/2011. Now this version will be a full
 * Admin system (5 levels)
 * VIP system
 * Anti-stuff: anti-(command)spam, anti-money hack (serversided money and score)
+* Logging
 
 ## Config
 

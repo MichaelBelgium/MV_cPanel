@@ -172,8 +172,9 @@ public OnPlayerConnect(playerid)
 	VipInfo[playerid][Toggle][2] = false;
 	PlayerInfo[playerid][pTimer][0] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
 
-	mysql_format(gCon, query, sizeof(query), "SELECT Playername FROM Players WHERE Playername = '%e'", GetPlayerNameEx(playerid));
-	mysql_tquery(gCon, query, "OnAccountCheck", "i", playerid);
+	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Bans WHERE Player = '%e' OR IP = '%e'", GetPlayerNameEx(playerid), PlayerInfo[playerid][IP]);
+	mysql_tquery(gCon, query, "OnBanCheck", "i", playerid);
+
 	return 1;
 }
 

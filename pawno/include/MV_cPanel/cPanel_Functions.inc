@@ -55,6 +55,22 @@ stock SaveLog(logtype, player[], command[] = "", target[] = "", params[] = "")
 	mysql_tquery(gCon, query);
 }
 
+stock BanPlayer(playerid, admin, reason[])
+{
+	new string[128];
+	if(admin != INVALID_PLAYER_ID)
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, reason);
+	else
+		format(string, sizeof(string), COL_ADMIN_1"-[Server]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", GetPlayerNameEx(playerid), playerid, reason);
+
+	SendClientMessageToAll(-1, string);
+
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP) VALUE ('%e', '%e', '%e', '%s')", GetPlayerNameEx(playerid), GetPlayerNameEx(admin), reason, PlayerInfo[playerid][IP]);
+	mysql_tquery(gCon, query);
+
+	Kick(playerid);
+}
+
 stock GetPlayerLevel(playerid) return PlayerInfo[playerid][Adminlevel];
 
 stock GetPlayerLevelEx(level)
