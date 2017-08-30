@@ -51,7 +51,8 @@ enum gPlayerInfo
 	Selected_Id,
 	Warns,
 	Muted,
-	OldSkin
+	OldSkin,
+	Cage[4]
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -171,10 +172,10 @@ public OnPlayerConnect(playerid)
 	VipInfo[playerid][Toggle][1] =
 	VipInfo[playerid][Toggle][2] = false;
 	PlayerInfo[playerid][pTimer][0] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
+	for(new i = 0; i < 4; i++) PlayerInfo[playerid][Cage][i] = INVALID_OBJECT_ID;
 
 	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Bans WHERE Player = '%e' OR IP = '%e'", GetPlayerNameEx(playerid), PlayerInfo[playerid][IP]);
 	mysql_tquery(gCon, query, "OnBanCheck", "i", playerid);
-
 	return 1;
 }
 
@@ -191,6 +192,9 @@ public OnPlayerDisconnect(playerid, reason)
 			mysql_query(gCon, query, false);
 		}
 	}
+
+	if(IsPlayerCaged(playerid))
+		UncagePlayer(playerid);
 
 	KillTimer(PlayerInfo[playerid][pTimer][0]);
 	KillTimer(PlayerInfo[playerid][pTimer][1]);

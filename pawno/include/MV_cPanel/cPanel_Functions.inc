@@ -135,6 +135,37 @@ stock LockVehicle(vehicleid)
 	SetVehicleParamsEx(vehicleid, engine, lights, alarm, VEHICLE_PARAMS_ON, bonnet, boot, objective);
 }
 
+stock GetWeaponNameEx(weaponid)
+{
+	new weapon[32];
+	GetWeaponName(weaponid, weapon, sizeof(weapon));
+	return weapon;
+}
+stock IsPlayerCaged(playerid) return IsValidObject(PlayerInfo[playerid][Cage][0]);
+
+stock CagePlayer(playerid)
+{
+	new Float:pos[3];
+	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+
+	PlayerInfo[playerid][Cage][0] = CreateObject(985, pos[0], pos[1] + 4.0, pos[2], 0.0, 0.0, 0.0);
+	PlayerInfo[playerid][Cage][1] = CreateObject(985, pos[0] + 4.0, pos[1], pos[2], 0.0, 0.0, 90.0);
+	PlayerInfo[playerid][Cage][2] = CreateObject(985, pos[0] - 4.0, pos[1], pos[2], 0.0, 0.0, 270.0);
+	PlayerInfo[playerid][Cage][3] = CreateObject(985, pos[0], pos[1] - 4.0, pos[2], 0.0, 0.0, 180.0);
+
+	PlayerPlaySound(playerid, 1137, pos[0], pos[1], pos[2]);
+	
+}
+
+stock UncagePlayer(playerid)
+{
+	for(new i = 0; i < 4; i++) 
+	{
+		DestroyObject(PlayerInfo[playerid][Cage][i]);
+		PlayerInfo[playerid][Cage][i] = INVALID_OBJECT_ID;
+	}
+}
+
 stock IsNumeric(const string[])
 {
     for (new i = 0, j = strlen(string); i < j; i++)
