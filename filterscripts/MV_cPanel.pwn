@@ -52,7 +52,8 @@ enum gPlayerInfo
 	Warns,
 	Muted,
 	OldSkin,
-	Cage[4]
+	Cage[4],
+	bool:Reconnecting
 };
 
 new PlayerInfo[MAX_PLAYERS][gPlayerInfo], query[256];
@@ -168,6 +169,7 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
 	PlayerInfo[playerid][OldSkin] =
 	VipInfo[playerid][Duration] = -1;
+	PlayerInfo[playerid][Reconnecting] =
 	VipInfo[playerid][Toggle][0] =
 	VipInfo[playerid][Toggle][1] =
 	VipInfo[playerid][Toggle][2] = false;
@@ -195,6 +197,16 @@ public OnPlayerDisconnect(playerid, reason)
 
 	if(IsPlayerCaged(playerid))
 		UncagePlayer(playerid);
+
+	if(PlayerInfo[playerid][Reconnecting])
+	{
+		new string[64];
+		format(string, sizeof(string), "unbanip %s", PlayerInfo[playerid][IP]);
+		SendRconCommand(string);
+		//SendRconCommand("reloadbans");
+
+		PlayerInfo[playerid][Reconnecting] = false;
+	}
 
 	KillTimer(PlayerInfo[playerid][pTimer][0]);
 	KillTimer(PlayerInfo[playerid][pTimer][1]);
