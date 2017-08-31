@@ -50,9 +50,14 @@ SendClientMessageToAdmins(color, message[])
     }
 }
 
-stock SaveLog(logtype, player[], command[] = "", target[] = "", params[] = "")
+stock SaveLog(logtype, player[] = "", command[] = "", target[] = "", params[] = "")
 {
-	new tmptarget[MAX_PLAYER_NAME], tmpparams[64], tmpcommand[16];
+	new tmptarget[MAX_PLAYER_NAME], tmpparams[64], tmpcommand[16], tmpplayer[MAX_PLAYER_NAME];
+
+	if(isnull(player))
+		format(tmpplayer, sizeof(tmpplayer), "%s", "NULL");
+	else
+		mysql_format(gCon, tmpplayer, sizeof(tmpplayer), "'%e'", player);
 
 	if(isnull(target))
 		format(tmptarget, sizeof(tmptarget), "%s", "NULL");
@@ -69,7 +74,7 @@ stock SaveLog(logtype, player[], command[] = "", target[] = "", params[] = "")
 	else
 		mysql_format(gCon, tmpcommand, sizeof(tmpcommand), "'%e'", command);
 
-	mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Player, Target, Command, Params) VALUES (%i, '%e', %s, %s, %s)", logtype, player, tmptarget, tmpcommand, tmpparams);
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Player, Target, Command, Params) VALUES (%i, %s, %s, %s, %s)", logtype, tmpplayer, tmptarget, tmpcommand, tmpparams);
 	mysql_tquery(gCon, query);
 }
 
@@ -94,10 +99,7 @@ stock BanPlayer(playerid, admin, reason[])
 
 	#if LOG_ANTICHEAT
 	if(admin == INVALID_PLAYER_ID)
-	{
-		mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Target, Command, Params) VALUES (%i, '%e', 'BAN', '%e')", LOG_TYPE_AC, GetPlayerNameEx(playerid), reason);
-		mysql_tquery(gCon, query);
-	}
+		SaveLog(LOG_TYPE_AC, "", "BAN", GetPlayerNameEx(playerid), reason);
 	#endif
 
 	Kick(playerid);
@@ -121,10 +123,7 @@ stock KickPlayer(playerid, admin, reason[])
 
 	#if LOG_ANTICHEAT
 	if(admin == INVALID_PLAYER_ID)
-	{
-		mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Target, Command, Params) VALUES (%i, '%e', 'KICK', '%e')", LOG_TYPE_AC, GetPlayerNameEx(playerid), reason);
-		mysql_tquery(gCon, query);
-	}
+		SaveLog(LOG_TYPE_AC, "", "KICK", GetPlayerNameEx(playerid), reason);
 	#endif
 	Kick(playerid);
 }
@@ -232,6 +231,20 @@ stock IsNumeric(const string[])
         if (string[i] > '9' || string[i] < '0') return 0;
     }
     return 1;
+}
+
+stock IsAdvertisement(string[])
+{
+	new iCount,	iPeriod, iPos, iChar, iColon;
+
+	while((iChar = string[iPos++])) 
+	{
+		if('0' <= iChar <= '9') iCount++;
+		else if(iChar == '.') iPeriod++;
+		else if(iChar == ':') iColon++;
+	}
+
+	return (iCount >= 7 && iPeriod >= 3 && iColon >= 1);
 }
 
 stock MsToString(millisecond, format[])

@@ -525,11 +525,23 @@ public OnPlayerCommandPerformed(playerid, cmdtext[], success)
 
 public OnPlayerText(playerid, text[])
 {
+	new string[128];
 	if(IsPlayerMuted(playerid))
 	{
-		new string[128];
 		format(string, sizeof(string), "You are muted for %i minute%s", PlayerInfo[playerid][Muted], PlayerInfo[playerid][Muted] != 1 ? ("s") : (""));
 		SendClientMessage(playerid, COLOR_RED, string);
+		return 0;
+	}
+
+	if(IsAdvertisement(text))
+	{
+		SendClientMessage(playerid, COLOR_RED, "Possible advertisement.");
+
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"possible advertisement detected from %s (%i): %s - Message prevent to sent.", AC_NAME, GetPlayerNameEx(playerid), playerid, text);
+		SendClientMessageToAdmins(-1, string);
+		#if LOG_ANTICHEAT
+			SaveLog(LOG_TYPE_AC, "", "ADVERT", GetPlayerNameEx(playerid), text);
+		#endif
 		return 0;
 	}
 

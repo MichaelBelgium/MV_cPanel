@@ -97,6 +97,8 @@ CMD:report(playerid, params[])
 // ================= ADMIN COMMANDS ===========================
 CMD:cpanel(playerid, params[])
 {
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	
 	if(IsPlayerAdmin(playerid) && !IsPlayerAdminEx(playerid, LEVEL_OWNER))
 	{
 		PlayerInfo[playerid][Adminlevel] = LEVEL_OWNER;
@@ -131,20 +133,15 @@ CMD:warn(playerid, params[])
 
 	if(PlayerInfo[id][Warns] >= MAX_WARNINGS)
 	{
+		PlayerInfo[id][Warns] = 0;
+
 		#if BAN_ON_WARN
-			PlayerInfo[id][Warns] = 0;
-
-			format(string, sizeof(string), "%i %s", id, "Reached max warns");
-			cmd_ban(playerid, string);
+			BanPlayer(id, INVALID_PLAYER_ID, "Reached max warns");
 		#else
-			format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has auto-kicked %s (%i) for receiving >= %i warnings, last: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, MAX_WARNINGS, reason);
-			SendClientMessageToAll(-1, string);
-
 			format(string, sizeof(string), "You've been kicked for having %i or more warnings, behave better in the future!", MAX_WARNINGS);
 			SendClientMessage(id, COLOR_RED, string);
 
-			PlayerInfo[id][Warns] = 0;
-			Kick(id);
+			KickPlayer(id, INVALID_PLAYER_ID, "Reached max warns");
 		#endif
 	}
 	else
@@ -842,7 +839,7 @@ CMD:reconnect(playerid, params[])
 	new id, reason[32], string[128];
 
 	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /reconnect [playerid] [Optional: reason]");
-	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't online");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	PlayerInfo[id][Reconnecting] = true;
 
@@ -1200,7 +1197,7 @@ CMD:setlevel(playerid, params[])
 	new id, level, string[128], oldlevel;
 
 	if(sscanf(params, "ii", id, level)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setlevel [playerid] [adminlevel]");
-	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't online");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(level == PlayerInfo[id][Adminlevel]) return SendClientMessage(playerid, COLOR_RED, "This player has already this adminlevel.");
 
 	oldlevel = PlayerInfo[id][Adminlevel];
@@ -1226,7 +1223,7 @@ CMD:fakechat(playerid, params[])
 	new id, msg[128], string[256];
 
 	if(sscanf(params, "is[128]", id, msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /fakechat [playerid] [message]");
-	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't online");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SendPlayerMessageToAll(id, msg);
 
