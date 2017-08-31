@@ -57,17 +57,57 @@ stock SaveLog(logtype, player[], command[] = "", target[] = "", params[] = "")
 
 stock BanPlayer(playerid, admin, reason[])
 {
-	new string[128];
+	new string[128], tmpadmin[MAX_PLAYER_NAME];
 	if(admin != INVALID_PLAYER_ID)
+	{
 		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, reason);
+		mysql_format(gCon, tmpadmin, sizeof(tmpadmin), "'%e'", GetPlayerNameEx(admin));
+	}
 	else
-		format(string, sizeof(string), COL_ADMIN_1"-[Server]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", GetPlayerNameEx(playerid), playerid, reason);
+	{
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", AC_NAME, GetPlayerNameEx(playerid), playerid, reason);
+		format(tmpadmin, sizeof(tmpadmin), "%s", "NULL");
+	}
 
 	SendClientMessageToAll(-1, string);
 
-	mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP) VALUE ('%e', '%e', '%e', '%s')", GetPlayerNameEx(playerid), GetPlayerNameEx(admin), reason, PlayerInfo[playerid][IP]);
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP) VALUE ('%e', %s, '%e', '%s')", GetPlayerNameEx(playerid), tmpadmin, reason, PlayerInfo[playerid][IP]);
 	mysql_tquery(gCon, query);
 
+	#if LOG_ANTICHEAT
+	if(admin == INVALID_PLAYER_ID)
+	{
+		mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Target, Command, Params) VALUES (%i, '%e', 'BAN', '%e')", LOG_TYPE_AC, GetPlayerNameEx(playerid), reason);
+		mysql_tquery(gCon, query);
+	}
+	#endif
+
+	Kick(playerid);
+}
+
+stock KickPlayer(playerid, admin, reason[])
+{
+	new string[128], tmpadmin[MAX_PLAYER_NAME];
+	if(admin != INVALID_PLAYER_ID)
+	{
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s",  GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, reason);
+		mysql_format(gCon, tmpadmin, sizeof(tmpadmin), "'%e'", GetPlayerNameEx(admin));
+	}
+	else
+	{
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s", AC_NAME, GetPlayerNameEx(playerid), playerid, reason);
+		format(tmpadmin, sizeof(tmpadmin), "%s", "NULL");
+	}
+
+	SendClientMessageToAll(-1, string);
+
+	#if LOG_ANTICHEAT
+	if(admin == INVALID_PLAYER_ID)
+	{
+		mysql_format(gCon, query, sizeof(query), "INSERT INTO Logs (Type, Target, Command, Params) VALUES (%i, '%e', 'KICK', '%e')", LOG_TYPE_AC, GetPlayerNameEx(playerid), reason);
+		mysql_tquery(gCon, query);
+	}
+	#endif
 	Kick(playerid);
 }
 

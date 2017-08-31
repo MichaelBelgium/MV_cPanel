@@ -1,11 +1,29 @@
 --
+-- Table structure for table `Bans`
+--
+
+CREATE TABLE IF NOT EXISTS `Bans` (
+  `bID` int(11) NOT NULL AUTO_INCREMENT,
+  `Player` varchar(24) NOT NULL,
+  `Admin` varchar(24) DEFAULT NULL,
+  `Reason` varchar(32) NOT NULL,
+  `IP` varchar(16) NOT NULL,
+  `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bID`),
+  KEY `Player` (`Player`,`Admin`),
+  KEY `Admin` (`Admin`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Logs`
 --
 
 CREATE TABLE IF NOT EXISTS `Logs` (
   `lID` int(11) NOT NULL AUTO_INCREMENT,
   `Type` tinyint(4) NOT NULL,
-  `Player` varchar(24) NOT NULL,
+  `Player` varchar(24) DEFAULT NULL,
   `Target` varchar(24) DEFAULT NULL,
   `Command` varchar(32) DEFAULT NULL,
   `Params` varchar(64) DEFAULT NULL,
@@ -13,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `Logs` (
   PRIMARY KEY (`lID`),
   KEY `Player` (`Player`),
   KEY `Target` (`Target`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -52,27 +70,16 @@ CREATE TABLE IF NOT EXISTS `Vips` (
   KEY `Name` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `Bans`
---
-
-CREATE TABLE IF NOT EXISTS `Bans` (
-  `bID` int(11) NOT NULL AUTO_INCREMENT,
-  `Player` varchar(24) NOT NULL,
-  `Admin` varchar(24) NOT NULL,
-  `Reason` varchar(32) NOT NULL,
-  `IP` varchar(16) NOT NULL,
-  `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`bID`),
-  KEY `Player` (`Player`,`Admin`),
-  KEY `Admin` (`Admin`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
-
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `Bans`
+--
+ALTER TABLE `Bans`
+  ADD CONSTRAINT `Bans_ibfk_1` FOREIGN KEY (`Player`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `Bans_ibfk_2` FOREIGN KEY (`Admin`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Constraints for table `Logs`
@@ -86,10 +93,3 @@ ALTER TABLE `Logs`
 --
 ALTER TABLE `Vips`
   ADD CONSTRAINT `Vips_ibfk_1` FOREIGN KEY (`Name`) REFERENCES `Players` (`Playername`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `Bans`
---
-ALTER TABLE `Bans`
-  ADD CONSTRAINT `Bans_ibfk_2` FOREIGN KEY (`Admin`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  ADD CONSTRAINT `Bans_ibfk_1` FOREIGN KEY (`Player`) REFERENCES `Players` (`Playername`) ON DELETE NO ACTION ON UPDATE CASCADE;

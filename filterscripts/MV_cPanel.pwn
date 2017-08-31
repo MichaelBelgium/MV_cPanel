@@ -79,7 +79,8 @@ enum
 {
 	LOG_TYPE_CMDS,
 	LOG_TYPE_ACMDS,
-	LOG_TYPE_REPORTS
+	LOG_TYPE_REPORTS,
+	LOG_TYPE_AC
 };
 
 enum e_vInfo

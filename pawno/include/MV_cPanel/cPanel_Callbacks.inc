@@ -128,6 +128,13 @@ public PlayerTimer(playerid)
 	{
 		BanPlayer(playerid, INVALID_PLAYER_ID, "Jetpack");
 	}
+
+	#if MAX_PING > 0
+	if(GetPlayerPing(playerid) > MAX_PING)
+	{
+		KickPlayer(playerid, INVALID_PLAYER_ID, "High ping");
+	}
+	#endif
 }
 
 public UnmuteTimer(playerid)
