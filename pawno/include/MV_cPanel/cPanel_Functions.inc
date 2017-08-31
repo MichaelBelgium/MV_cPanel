@@ -15,12 +15,30 @@ ShowPlayerDialogEx(playerid,dialogid)
 			ShowPlayerDialog(playerid, DIALOG_REGISTER, DIALOG_STYLE_PASSWORD, "Register", string, "Register", "");
 		}
 
-        case DIALOG_CPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Open player panel\nOpen server panel\nRestart server","Ok","Cancel");
-        case DIALOG_CPANEL_PLAYERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_PLAYERPANEL,DIALOG_STYLE_INPUT,"Player ID","Please fill in a PlayerID.","OK","Cancel");
-        case DIALOG_CPANEL_SERVERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Change gamemode \r\nLoad filterscript \r\nUnload filterscript \r\nSet hostname \r\nSet server password \r\nSet gamemodetext","Select","Back");
+		case DIALOG_CPANEL: 
+		{
+			if(IsPlayerAdminEx(playerid, LEVEL_OWNER))
+				format(string, sizeof(string), "Open player panel\nOpen server panel\nRestart server");
+			else
+				format(string, sizeof(string), "Open player panel");
+
+			ShowPlayerDialog(playerid,DIALOG_CPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium",string,"Ok","Cancel");	
+		}
+		case DIALOG_CPANEL_PLAYERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_PLAYERPANEL,DIALOG_STYLE_INPUT,"Player ID","Please fill in a PlayerID.","OK","Cancel");
+		case DIALOG_CPANEL_SERVERPANEL: ShowPlayerDialog(playerid,DIALOG_CPANEL_SERVERPANEL,DIALOG_STYLE_LIST,"cPanel by {FF0A00}Michael@Belgium","Change gamemode \r\nLoad filterscript \r\nUnload filterscript \r\nSet hostname \r\nSet server password \r\nSet gamemodetext","Select","Back");
+		case DIALOG_CPANEL_PP_LIST: 
+		{
+			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(string,"Spectate\nGet\nGoto\n(Un)Mute\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(string,"Freeze\nUnfreeze\nJail\nUnjail\nKill\nKick\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(string, "Ban\n");
+			if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(string, "Set level");
+
+			ShowPlayerDialog(playerid, DIALOG_CPANEL_PP_LIST, DIALOG_STYLE_LIST, "Options", string, "Select", "Cancel");
+		}
+		case DIALOG_CPANEL_PP_LIST_LEVEL: ShowPlayerDialog(playerid, DIALOG_CPANEL_PP_LIST_LEVEL, DIALOG_STYLE_INPUT, "Edit adminlevel", "Which adminlevel would you promote/demote the player to?", "Change", "Cancel");
 	}
 
-    return 1;
+	return 1;
 }
 
 SendClientMessageToAdmins(color, message[])
@@ -123,6 +141,7 @@ stock GetPlayerLevelEx(level)
         case LEVEL_TRIAL_ADMIN: playerlevel = "Trial administrator";
         case LEVEL_ADMIN: playerlevel = "Administrator";
         case LEVEL_OWNER: playerlevel = "Owner";
+        default: playerlevel = "Normal player";
     }
     return playerlevel;
 }

@@ -33,7 +33,11 @@ enum
 	DIALOG_CPANEL_SERVERPANEL_3,
 	DIALOG_CPANEL_SERVERPANEL_4,
 	DIALOG_CPANEL_SERVERPANEL_5,
-	DIALOG_CPANEL_PLAYERPANEL_LIST
+	DIALOG_CPANEL_PP_LIST,
+	DIALOG_CPANEL_PP_LIST_JAIL,
+	DIALOG_CPANEL_PP_LIST_KICK,
+	DIALOG_CPANEL_PP_LIST_BAN,
+	DIALOG_CPANEL_PP_LIST_LEVEL
 };
 
 enum gPlayerInfo
@@ -313,15 +317,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			PlayerInfo[playerid][Selected_Id] = strval(inputtext);
 
-			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(string,"Spectate\nGet\nGoto\n(Un)Mute\n");
-			if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(string,"Freeze\nUnfreeze\nJail\nUnjail\nKill\nKick\n");
-			if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(string, "Ban\n");
-			if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(string, "Set level");
-
-			ShowPlayerDialog(playerid, DIALOG_CPANEL_PLAYERPANEL_LIST, DIALOG_STYLE_LIST, "Options", string, "Select", "Cancel");
+			ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
 		}
 
-		case DIALOG_CPANEL_PLAYERPANEL_LIST:
+		case DIALOG_CPANEL_PP_LIST:
 		{
 			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PLAYERPANEL);
 			if(PlayerInfo[playerid][Selected_Id] == INVALID_PLAYER_ID) return 1;
@@ -339,17 +338,61 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					if(IsPlayerMuted(PlayerInfo[playerid][Selected_Id]))
 						cmd_unmute(playerid, id);
 					else
-						cmd_mute(playerid, id); //needs reason
+						cmd_mute(playerid, id);
 				}
 				case 4: cmd_freeze(playerid, id);
 				case 5: cmd_unfreeze(playerid, id);
-				case 6: cmd_jail(playerid, id); //needs reason
+				case 6: ShowPlayerDialog(playerid, DIALOG_CPANEL_PP_LIST_JAIL, DIALOG_STYLE_INPUT, "Jail player", "For which reason does the player need to be jailed?", "Jail", "Cancel");
 				case 7: cmd_unjail(playerid, id);
-				case 8: cmd_akill(playerid, id); //needs reason
-				case 9: cmd_kick(playerid, id); //needs reason
-				case 10: cmd_ban(playerid, id); //needs reason
-				case 11: cmd_setlevel(playerid, id); //needs level
+				case 8: cmd_akill(playerid, id);
+				case 9: ShowPlayerDialog(playerid, DIALOG_CPANEL_PP_LIST_KICK, DIALOG_STYLE_INPUT, "Kick player", "For which reason does the player need to be kicked?", "Kick", "Cancel");
+				case 10: ShowPlayerDialog(playerid, DIALOG_CPANEL_PP_LIST_BAN, DIALOG_STYLE_INPUT, "Ban player", "For which reason does the player need to be banned?", "Ban", "Cancel");
+				case 11: ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST_LEVEL);
 			}
+
+			if(listitem != 6 && listitem != 9 && listitem != 10 && listitem != 11)
+				PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
+		}
+
+		case DIALOG_CPANEL_PP_LIST_JAIL:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
+			format(string, sizeof(string), "%i %s", PlayerInfo[playerid][Selected_Id], inputtext);
+			cmd_jail(playerid, string);
+
+			PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
+		}
+
+		case DIALOG_CPANEL_PP_LIST_KICK:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
+			format(string, sizeof(string), "%i %s", PlayerInfo[playerid][Selected_Id], inputtext);
+			cmd_kick(playerid, string);
+
+			PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
+		}
+
+		case DIALOG_CPANEL_PP_LIST_BAN:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
+			format(string, sizeof(string), "%i %s", PlayerInfo[playerid][Selected_Id], inputtext);
+			cmd_ban(playerid, string);
+
+			PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
+		}
+
+		case DIALOG_CPANEL_PP_LIST_LEVEL:
+		{
+			if(!response) return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
+			if(!IsNumeric(inputtext)) 
+			{
+				SendClientMessage(playerid, COLOR_RED, "This isn't a number.");
+				return ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST_LEVEL);
+			}
+
+			new level = strval(inputtext);
+			format(string, sizeof(string), "%i %i", PlayerInfo[playerid][Selected_Id], level);
+			cmd_setlevel(playerid, string);
 
 			PlayerInfo[playerid][Selected_Id] = INVALID_PLAYER_ID;
 		}
@@ -430,6 +473,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD))
+	{
+		PlayerInfo[playerid][Selected_Id] = clickedplayerid;
+
+		ShowPlayerDialogEx(playerid, DIALOG_CPANEL_PP_LIST);
+	}
 	return 1;
 }
 

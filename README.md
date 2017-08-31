@@ -43,3 +43,7 @@ If true, edit the config file and re-compile the filterscript.
 #define LOG_REPORTS			true 	//log all the reports that have been sent to admins
 #define LOG_ANTICHEAT		true 	//log all the actions from the anti-cheat
 ```
+
+# Contributing
+You are free to contribute on this admin/vip system. Fork it and open a PR. I'd even appreciate it. 
+More commands, anti-cheat stuff, improvements, whatever you like.

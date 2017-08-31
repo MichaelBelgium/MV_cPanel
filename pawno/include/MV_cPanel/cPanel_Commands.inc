@@ -368,7 +368,7 @@ CMD:akill(playerid, params[])
 	SendClientMessageToAll(-1, string);
 
 	#if LOG_ADMINCOMMANDS
-		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "akill", GetPlayerNameEx(id), params);
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "akill", GetPlayerNameEx(id));
 	#endif
 	return 1;
 }
@@ -387,7 +387,7 @@ CMD:kick(playerid, params[])
 	Kick(id);
 
 	#if LOG_ADMINCOMMANDS
-		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "kick", GetPlayerNameEx(id), params);
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "kick", GetPlayerNameEx(id), reason);
 	#endif
 	return 1;
 }
