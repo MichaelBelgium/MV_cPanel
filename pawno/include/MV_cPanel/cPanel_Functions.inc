@@ -189,6 +189,15 @@ stock GetPlayerNameEx(playerid)
     return name;
 }
 
+cPanel_func:IsWeaponForbidden(weaponid)
+{
+	for(new i = 0; i < sizeof(forbiddenWeapons); i++)
+	{
+		if(weaponid == forbiddenWeapons[i]) return true;
+	}
+	return false;
+}
+
 stock UnlockVehicle(vehicleid) 
 {
 	new engine, lights, alarm, doors, bonnet, boot, objective;

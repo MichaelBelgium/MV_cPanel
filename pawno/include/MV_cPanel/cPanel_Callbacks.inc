@@ -135,6 +135,19 @@ public PlayerTimer(playerid)
 		KickPlayer(playerid, INVALID_PLAYER_ID, "High ping");
 	}
 	#endif
+
+	for(new i = 0; i < sizeof(forbiddenWeapons); i++)
+	{
+		if(GetPlayerWeapon(playerid) == forbiddenWeapons[i])
+		{
+			#if BAN_ON_FWEAPON
+			BanPlayer(playerid, INVALID_PLAYER_ID, "Forbidden weapon");
+			#else
+			KickPlayer(playerid, INVALID_PLAYER_ID, "Forbidden weapon");
+			#endif
+			break;
+		}
+	}
 }
 
 public UnmuteTimer(playerid)

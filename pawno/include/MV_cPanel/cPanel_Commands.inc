@@ -749,6 +749,7 @@ CMD:giveweapon(playerid, params[])
 
 	if(sscanf(params, "iiI(500)", id, weapon, ammo)) return SendClientMessage(playerid, COLOR_RED, "Usage: /giveweapon [playerid] [weaponid] [Optional: ammo]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
+	if(IsWeaponForbidden(weapon)) return SendClientMessage(playerid, COLOR_RED, "You are not permitted to give this weapon.");
 
 	GivePlayerWeapon(id, weapon, ammo);
 
@@ -1030,6 +1031,7 @@ CMD:giveallweapon(playerid, params[])
 	new weapon, ammo, string[128];
 
 	if(sscanf(params, "iI(500)", weapon, ammo)) return SendClientMessage(playerid, COLOR_RED, "Usage: /giveallweapon [weaponid] [Optional: ammo]");
+	if(IsWeaponForbidden(weapon)) return SendClientMessage(playerid, COLOR_RED, "You are not permitted to give this weapon.");
 	
 	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
 	{

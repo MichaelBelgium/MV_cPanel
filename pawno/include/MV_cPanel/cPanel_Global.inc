@@ -54,3 +54,8 @@ stock GetPlayerScoreEx(playerid)
 {
 	return CallRemoteFunction("GetPlayerScoreEx", "i", playerid);
 }
+
+stock IsWeaponForbidden(weaponid)
+{
+	return CallRemoteFunction("IsWeaponForbidden", "i", weaponid);
+}
