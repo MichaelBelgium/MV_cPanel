@@ -63,6 +63,7 @@ Right. It's quite easy to do so.
 * Make sure you have all the requirements (plugins and the include files)
 * Place `MV_cPanel` in the filterscripts folder
 * Edit your server.cfg like [here](https://github.com/MichaelBelgium/MV_cPanel/blob/master/server.cfg#L8-L9) (thats on Windows, on Linux you'll need to add `.so` after the plugins)
+* Import [sqldump.sql](https://github.com/MichaelBelgium/MV_cPanel/blob/master/sql_dump.sql) into your database
 
 Optional:
 * Edit [the config file](https://github.com/MichaelBelgium/MV_cPanel/blob/master/pawno/include/MV_cPanel/cPanel_Config.inc) if you don't agree with something

@@ -252,7 +252,7 @@ stock IsNumeric(const string[])
     return 1;
 }
 
-stock IsAdvertisement(string[])
+cPanel_func:IsAdvertisement(string[])
 {
 	new iCount,	iPeriod, iPos, iChar, iColon;
 

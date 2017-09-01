@@ -59,3 +59,8 @@ stock IsWeaponForbidden(weaponid)
 {
 	return CallRemoteFunction("IsWeaponForbidden", "i", weaponid);
 }
+
+stock IsAdvertisement(string[])
+{
+	return CallRemoteFunction("IsAdvertisement", "s", string);
+}
