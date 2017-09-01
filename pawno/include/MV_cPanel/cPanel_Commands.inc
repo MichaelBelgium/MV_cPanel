@@ -28,7 +28,7 @@ CMD:stats(playerid,params[])
 		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", GetPlayerNameEx(playerid), playerid, GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerLevel(playerid), IsPlayerVIP(playerid) ? ("yes") : ("no"), GetPlayerPing(playerid), PlayerInfo[playerid][IP]);
 		strcat(stats, string);
 
-		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[playerid][Kills],  PlayerInfo[playerid][Deaths], GetPlayerScore(playerid), GetPlayerCash(playerid));
+		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[playerid][Kills],  PlayerInfo[playerid][Deaths], GetPlayerScoreEx(playerid), GetPlayerCash(playerid));
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Online time (session): %s\nOnline time (total): %s\n\n", MsToString(NetStats_GetConnectedTime(playerid),"%1h:%1m:%1s"), MsToString(((NetStats_GetConnectedTime(playerid)/1000)+PlayerInfo[playerid][OnlineTime])*1000,"%1h:%1m:%1s"));
@@ -43,7 +43,7 @@ CMD:stats(playerid,params[])
 		format(string, sizeof(string), "Name: %s (ID: %i)\nLevel: %s (%i)\nVIP: %s\nPing: %i\nIP: %s\n\n", GetPlayerNameEx(id), id, GetPlayerLevelEx(GetPlayerLevel(id)), GetPlayerLevel(id), IsPlayerVIP(id) ? ("yes") : ("no"), GetPlayerPing(id), PlayerInfo[id][IP]);
 		strcat(stats, string);
 
-		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[id][Kills], PlayerInfo[id][Deaths], GetPlayerScore(id), GetPlayerCash(id));
+		format(string, sizeof(string), "Kills: %i\nDeaths: %i\nScore: %i\nMoney: %i\n\n",  PlayerInfo[id][Kills], PlayerInfo[id][Deaths], GetPlayerScoreEx(id), GetPlayerCash(id));
 		strcat(stats, string);
 
 		format(string, sizeof(string), "Online time (session): %s\nOnline time (total): %s\n", MsToString(NetStats_GetConnectedTime(id),"%1h:%1m:%1s"), MsToString(((NetStats_GetConnectedTime(id)/1000)+PlayerInfo[id][OnlineTime])*1000,"%1h:%1m:%1s"));
@@ -929,8 +929,7 @@ CMD:setscore(playerid, params[])
 	if(sscanf(params, "ii", id, score)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setscore [playerid] [score]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't connected");
 
-	PlayerInfo[id][Score] = score;
-	SetPlayerScore(id, PlayerInfo[id][Score]);
+	SetPlayerScoreEx(id, score);
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"set %s's (%i) score to %i", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, score);
 	SendClientMessageToAll(-1, string);
@@ -992,8 +991,7 @@ CMD:setallscore(playerid, params[])
 	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
 	{
 		if(!IsPlayerConnected(i)) continue;
-		PlayerInfo[i][Score] = score;
-		SetPlayerScore(i, PlayerInfo[i][Score]);
+		SetPlayerScoreEx(i, score);
 	}
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"set everyone's score to %i", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), score);

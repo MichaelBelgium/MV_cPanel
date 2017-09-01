@@ -1,3 +1,5 @@
+#define cPanel_func:%0(%1)		forward %0(%1); public %0(%1)
+
 ShowPlayerDialogEx(playerid,dialogid)
 {
 	new string[128];
@@ -41,7 +43,7 @@ ShowPlayerDialogEx(playerid,dialogid)
 	return 1;
 }
 
-SendClientMessageToAdmins(color, message[])
+cPanel_func:SendClientMessageToAdmins(color, message[])
 {
     for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
     {
@@ -145,17 +147,25 @@ stock GetPlayerLevelEx(level)
     return playerlevel;
 }
 
-stock IsPlayerVIP(playerid) return VipInfo[playerid][Duration] != -1;
-stock IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
-stock IsPlayerMuted(playerid) return PlayerInfo[playerid][Muted] > 0;
+cPanel_func:IsPlayerVIP(playerid) return VipInfo[playerid][Duration] != -1;
+cPanel_func:IsPlayerAdminEx(playerid, level) return PlayerInfo[playerid][Adminlevel] >= level;
+cPanel_func:IsPlayerMuted(playerid) return PlayerInfo[playerid][Muted] > 0;
 
-stock GivePlayerScore(playerid, score)
+cPanel_func:GivePlayerScore(playerid, score)
 {
-    PlayerInfo[playerid][Score] += score;
-    SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+	PlayerInfo[playerid][Score] += score;
+	SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
 }
 
-stock GivePlayerCash(playerid, money)
+cPanel_func:SetPlayerScoreEx(playerid, score)
+{
+	PlayerInfo[playerid][Score] = score;
+	SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+}
+
+cPanel_func:GetPlayerScoreEx(playerid) return PlayerInfo[playerid][Score];
+
+cPanel_func:GivePlayerCash(playerid, money)
 {
     PlayerInfo[playerid][Money] += money;
 
@@ -163,7 +173,7 @@ stock GivePlayerCash(playerid, money)
     GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
 }
 
-stock SetPlayerCash(playerid, money)
+cPanel_func:SetPlayerCash(playerid, money)
 {
     PlayerInfo[playerid][Money] = money;
 
@@ -171,7 +181,7 @@ stock SetPlayerCash(playerid, money)
     GivePlayerMoney(playerid, PlayerInfo[playerid][Money]);
 }
 
-stock GetPlayerCash(playerid) return PlayerInfo[playerid][Money];
+cPanel_func:GetPlayerCash(playerid) return PlayerInfo[playerid][Money];
 stock GetPlayerNameEx(playerid)
 {
     new name[MAX_PLAYER_NAME];

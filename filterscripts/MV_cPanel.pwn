@@ -190,7 +190,7 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", PlayerInfo[playerid][Score], GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], GetPlayerNameEx(playerid));
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", GetPlayerScoreEx(playerid), GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], GetPlayerNameEx(playerid));
 		mysql_query(gCon, query, false);
 
 		if(IsPlayerVIP(playerid))
