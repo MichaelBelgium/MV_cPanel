@@ -10,6 +10,11 @@ stock SendClientMessageToAdmins(color, message[])
 	CallRemoteFunction("SendClientMessageToAdmins", "is", color, message);
 }
 
+stock SendClientMessageToVips(color, message[])
+{
+	CallRemoteFunction("SendClientMessageToVips", "is", color, message);
+}
+
 stock IsPlayerVIP(playerid)
 {
 	return CallRemoteFunction("IsPlayerVIP", "i", playerid);
@@ -42,7 +47,7 @@ stock GivePlayerCash(playerid, money)
 
 stock SetPlayerCash(playerid, money)
 {
-	CallRemoteFunction("SetPlayerCash", "ii",playerid, money );
+	CallRemoteFunction("SetPlayerCash", "ii",playerid, money);
 }
 
 stock GetPlayerCash(playerid)

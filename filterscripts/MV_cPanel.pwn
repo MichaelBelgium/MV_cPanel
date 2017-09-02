@@ -236,6 +236,29 @@ public OnPlayerDeath(playerid, killerid, reason)
 	return 1;
 }
 
+public OnPlayerStateChange(playerid, newstate, oldstate)
+{
+	if(IsPlayerVIP(playerid) && VipInfo[playerid][Toggle][1])
+	{
+		if(newstate == PLAYER_STATE_DRIVER)
+		{
+			SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2"Your vehicle has been automaticly locked.");
+			LockVehicle(GetPlayerVehicleID(playerid));
+		}
+	}
+	return 1;
+}
+
+public OnPlayerExitVehicle(playerid, vehicleid)
+{
+	if(IsPlayerVIP(playerid) && VipInfo[playerid][Toggle][1] && GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
+	{
+		SendClientMessage(playerid, -1,  COL_VIP_1"-[VIP]- "COL_VIP_2"This vehicle has been unlocked as you left the vehicle.");
+		UnlockVehicle(vehicleid);
+	}
+	return 1;
+}
+
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	new string[128];

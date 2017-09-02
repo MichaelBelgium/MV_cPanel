@@ -4,7 +4,7 @@ CMD:cmds(playerid,params[])
 
 	strcat(cmds, "General:\nstats admins report\n\n");
 
-	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock\n\n");
+	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock vipchat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill cage uncage crash\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\nget goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
@@ -1301,6 +1301,8 @@ CMD:vipveh(playerid, params[])
 	return 1;
 }
 
+CMD:vveh(playerid, params[]) return cmd_vipveh(playerid, params);
+
 CMD:viprep(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
@@ -1311,6 +1313,7 @@ CMD:viprep(playerid, params[])
 }
 
 CMD:viprepair(playerid, params[]) return cmd_viprep(playerid, params);
+CMD:vrep(playerid, params[]) return cmd_viprep(playerid, params);
 
 CMD:vipnos(playerid, params[])
 {
@@ -1320,6 +1323,8 @@ CMD:vipnos(playerid, params[])
 	SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2"Nitro has been added to your vehicle.");
 	return 1;
 }
+
+CMD:vnos(playerid, params[]) return cmd_vipnos(playerid, params);
 
 CMD:vipflip(playerid, params[])
 {
@@ -1333,6 +1338,8 @@ CMD:vipflip(playerid, params[])
 	return 1;
 }
 
+CMD:vflip(playerid, params[]) return cmd_vipflip(playerid, params);
+
 CMD:vipunlimnos(playerid, params[])
 {
 	new string[128];
@@ -1344,6 +1351,8 @@ CMD:vipunlimnos(playerid, params[])
 	SendClientMessage(playerid, -1, string);
 	return 1;
 }
+
+CMD:vunlimnos(playerid, params[]) return cmd_vipunlimnos(playerid, params);
 
 CMD:vipheal(playerid, params[])
 {
@@ -1365,6 +1374,8 @@ CMD:vipheal(playerid, params[])
 	return 1;
 }
 
+CMD:vheal(playerid, params[]) return cmd_vipheal(playerid, params);
+
 CMD:vipgodcar(playerid, params[])
 {
 	if(!IsPlayerVIP(playerid)) return 0;
@@ -1375,6 +1386,8 @@ CMD:vipgodcar(playerid, params[])
 	SendClientMessage(playerid, -1, string);
 	return 1;
 }
+
+CMD:vgodcar(playerid, params[]) return cmd_vipgodcar(playerid, params);
 
 CMD:viplock(playerid, params[])
 {
@@ -1393,3 +1406,19 @@ CMD:viplock(playerid, params[])
 	VipInfo[playerid][Toggle][1] = !VipInfo[playerid][Toggle][1];
 	return 1;
 }
+
+CMD:vlock(playerid, params[]) return cmd_viplock(playerid, params);
+
+CMD:vipchat(playerid, params[])
+{
+	if(!IsPlayerVIP(playerid)) return 0;
+	new msg[128], string[256];
+
+	if(sscanf(params, "s[128]", msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /vipchat [message]");
+	
+	format(string, sizeof(string), COL_VIP_1"VIP %s (%i): "COL_VIP_2"%s", GetPlayerNameEx(playerid), playerid, msg);
+	SendClientMessageToVips(-1, string);
+	return 1;
+}
+
+CMD:vchat(playerid, params[]) return cmd_vipchat(playerid, params);

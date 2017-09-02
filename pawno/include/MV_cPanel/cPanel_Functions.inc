@@ -45,11 +45,20 @@ ShowPlayerDialogEx(playerid,dialogid)
 
 cPanel_func:SendClientMessageToAdmins(color, message[])
 {
-    for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
-    {
-        if(!IsPlayerConnected(i) || PlayerInfo[i][Adminlevel] == 0) continue;
-        SendClientMessage(i, color, message);
-    }
+	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+	{
+		if(!IsPlayerConnected(i) || PlayerInfo[i][Adminlevel] == 0) continue;
+		SendClientMessage(i, color, message);
+	}
+}
+
+cPanel_func:SendClientMessageToVips(color, message[])
+{
+	for(new i = 0, j = GetPlayerPoolSize(); i <= j; i++)
+	{
+		if(!IsPlayerConnected(i) || !IsPlayerVIP(i)) continue;
+		SendClientMessage(i, color, message);
+	}
 }
 
 stock SaveLog(logtype, player[] = "", command[] = "", target[] = "", params[] = "")

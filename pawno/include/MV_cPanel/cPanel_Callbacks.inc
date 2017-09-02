@@ -48,7 +48,7 @@ public OnBanCheck(playerid)
 
 		ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Banned", banned, "OK", "");
 
-		format(string, sizeof(string), COL_ADMIN_1"-[Server]- "COL_ADMIN_2"Denied connection to %s. Banned: %s - %s - %s (%i)", GetPlayerNameEx(playerid), data[0], data[3], data[2], bID);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"Denied connection to %s. Banned: %s - %s - %s (%i)", AC_NAME, GetPlayerNameEx(playerid), data[0], data[3], data[2], bID);
 		SendClientMessageToAdmins(-1, string);
 
 		Kick(playerid);
