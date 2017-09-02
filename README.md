@@ -57,6 +57,11 @@ new forbiddenWeapons[] =			//define any forbidden weaponids in this array, the a
 You are free to contribute on this admin/vip system. Fork it and open a PR. I'd even appreciate it. 
 More commands, anti-cheat stuff, improvements, whatever you like.
 
+# How to make myself owner?
+There are 2 ways to do this:
+* Go in your server, register your account, login as rcon admin and do /cpanel.
+* Go in your server, register your account, go to your database and edit the `Adminlevel` column in the `Players` table to 5
+
 # Installation
 Right. It's quite easy to do so.
 
