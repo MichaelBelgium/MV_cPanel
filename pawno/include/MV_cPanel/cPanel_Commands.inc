@@ -6,8 +6,8 @@ CMD:cmds(playerid,params[])
 
 	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\ncage uncage get goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill cage uncage crash\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\nget goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip\n");
 
@@ -493,11 +493,25 @@ CMD:burn(playerid, params[])
 	return 1;
 }
 
-// CMD:crash(playerid, params[])
-// {
-// 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
-// 	return 1;
-// }
+CMD:crash(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
+	new Float:pos[3], id, reason[32], string[128];
+
+	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /crash [playerid] [Optional: reason]");
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
+
+	GetPlayerPos(id, pos[0], pos[1], pos[2]);
+	CreatePlayerObject(id, 385, pos[0], pos[1], pos[2], 0, 0, 0);
+	
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"crashed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
+	SendClientMessageToAll(-1, string);
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "crash", GetPlayerNameEx(id), reason);
+	#endif
+	return 1;
+}
 
 CMD:ajetpack(playerid, params[])
 {
@@ -523,7 +537,7 @@ CMD:ajetpack(playerid, params[])
 
 CMD:cage(playerid, params[])
 {
-	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, reason[32], string[128];
 
 	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /cage [playerid] [Optional: reason]");
@@ -543,7 +557,7 @@ CMD:cage(playerid, params[])
 
 CMD:uncage(playerid, params[])
 {
-	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
+	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, string[128];
 
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /uncage [playerid]");

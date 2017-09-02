@@ -27,6 +27,7 @@
 #define LOG_ADMINCOMMANDS	true	//log admin commands with all the info they give (almost the same like LOG_COMMANDS but u get more info in the db)
 #define LOG_REPORTS			true	//log all the reports that have been sent to admins
 #define LOG_ANTICHEAT		true	//log all the actions from the anti-cheat
+#define LOG_MYSQL			false	//This is just to enable/disable the logging of the plugin, litterally every query etc.
 
 new forbiddenWeapons[] =			//define any forbidden weaponids in this array, the anti-cheat will ban/kick the player if he has any of these weapons
 {

@@ -141,9 +141,12 @@ public OnFilterScriptInit()
 		print("Shutting down server.");
 
 		SendRconCommand("exit");
+		return 1;
 	}
-	else
+	
+	#if LOG_MYSQL
 		mysql_log(ALL);
+	#endif
 
 	return 1;
 }
