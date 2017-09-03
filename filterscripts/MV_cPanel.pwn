@@ -126,6 +126,8 @@ new aVehicleNames[212][e_vInfo] =
 	{"Stair Trailer", 608},{"Boxville", 609},{"Farm Plow", 610},{"Utility Trailer", 611}
 };
 
+new bool:ChatEnabled;
+
 
 public OnFilterScriptInit()
 {
@@ -148,6 +150,7 @@ public OnFilterScriptInit()
 		mysql_log(ALL);
 	#endif
 
+	ChatEnabled = true;
 	return 1;
 }
 
@@ -546,6 +549,9 @@ public OnPlayerCommandPerformed(playerid, cmdtext[], success)
 	if(success)
 		SaveLog(LOG_TYPE_CMDS, GetPlayerNameEx(playerid), cmdtext);
 	#endif
+
+	if(!success)
+		SendClientMessage(playerid, COLOR_RED, "Unknown command. Check /cmds to view all available commands.");
 	return 1;
 }
 
@@ -556,6 +562,12 @@ public OnPlayerText(playerid, text[])
 	{
 		format(string, sizeof(string), "You are muted for %i minute%s", PlayerInfo[playerid][Muted], PlayerInfo[playerid][Muted] != 1 ? ("s") : (""));
 		SendClientMessage(playerid, COLOR_RED, string);
+		return 0;
+	}
+
+	if(!ChatEnabled)
+	{
+		SendClientMessage(playerid, COLOR_RED, "The chat is disabled.");
 		return 0;
 	}
 

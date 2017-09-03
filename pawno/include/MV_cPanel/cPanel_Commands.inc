@@ -2,10 +2,10 @@ CMD:cmds(playerid,params[])
 {
 	new cmds[256*3];
 
-	strcat(cmds, "General:\nstats admins report\n\n");
+	strcat(cmds, "General:\nstats admins report changepassword\n\n");
 
 	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock vipchat\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty togglechat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill cage uncage crash\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\nget goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
@@ -16,6 +16,24 @@ CMD:cmds(playerid,params[])
 }
 
 CMD:commands(playerid, params[]) return cmd_cmds(playerid,params);
+
+CMD:changepassword(playerid, params[])
+{
+	new pass[2][32], Cache:result;
+
+	if(sscanf(params, "s[32]s[32]", pass[0],pass[1])) return SendClientMessage(playerid, COLOR_RED, "Usage: /changepass(word) [old password] [new password]");
+
+	mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Password = SHA2('%e', 512) WHERE Password = SHA2('%e', 512) AND Playername = '%e'", pass[1], pass[0], GetPlayerNameEx(playerid));
+	result = mysql_query(gCon, query);
+
+	if(cache_affected_rows() == 0)
+		SendClientMessage(playerid, COLOR_RED, "Wrong old password.");
+	else
+		SendClientMessage(playerid, COLOR_GREEN, "Successfully changed password. It is recommended you reconnect to check your new password.");
+
+	cache_delete(result);
+	return 1;
+}
 
 CMD:stats(playerid,params[])
 {
@@ -298,7 +316,7 @@ CMD:disarm(playerid, params[])
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	ResetPlayerWeapons(id);
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_1"disarmed %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"disarmed %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);
 
 	#if LOG_ADMINCOMMANDS
@@ -332,6 +350,17 @@ CMD:adminduty(playerid, params[])
 	#if LOG_ADMINCOMMANDS
 		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "adminduty");
 	#endif
+	return 1;
+}
+
+CMD:togglechat(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
+	new string[128];
+	ChatEnabled = !ChatEnabled;
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"%s the chat.", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), ChatEnabled ? ("enabled") : ("disabled"));
+	SendClientMessageToAll(-1, string);
 	return 1;
 }
 
