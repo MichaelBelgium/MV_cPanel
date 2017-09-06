@@ -69,3 +69,8 @@ stock IsAdvertisement(string[])
 {
 	return CallRemoteFunction("IsAdvertisement", "s", string);
 }
+
+stock AddPrivateVehicle(vehicleid, owner[])
+{
+	CallRemoteFunction("AddPrivateVehicle", "is", vehicleid, owner);
+}

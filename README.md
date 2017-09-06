@@ -17,6 +17,7 @@ The script was originally created on 15/04/2011. Now this version will be a full
 * VIP system
 * Basic anti-cheat
 * Logging
+* Private vehicles
 
 ## Config
 
@@ -31,6 +32,7 @@ If true, edit the config file and re-compile the filterscript.
 
 #define MAX_WARNINGS		5		//max warnings a player can have before he gets kicked/banned
 #define MAX_PING			500		//max ping a player can get, above = kick (0 to disable)
+#define MAX_PRIV_VEHICLES	20		//max private vehicles allowed in the server
 
 #define BAN_ON_WARN			false	//if true, a player which reaches MAX_WARNINGS he'll get banned, else kicked.
 #define BAN_ON_FWEAPON		true	//if true, a player that has a forbidden weapon (from the forbiddenWeapons array) he'll get banned, else kicked. 
@@ -57,10 +59,8 @@ new forbiddenWeapons[] =			//define any forbidden weaponids in this array, the a
 You are free to contribute on this admin/vip system. Fork it and open a PR. I'd even appreciate it. 
 More commands, anti-cheat stuff, improvements, whatever you like.
 
-# How to make myself owner?
-There are 2 ways to do this:
-* Go in your server, register your account, login as rcon admin and do /cpanel.
-* Go in your server, register your account, go to your database and edit the `Adminlevel` column in the `Players` table to 5
+# FAQ
+Don't know how to create yourself as an admin? Or something else? I've made a [FAQ](https://github.com/MichaelBelgium/MV_cPanel/wiki/FAQ) on the wiki.
 
 # Installation
 Right. It's quite easy to do so.

@@ -275,6 +275,42 @@ cPanel_func:IsAdvertisement(string[])
 	return (iCount >= 7 && iPeriod >= 3 && iColon >= 1);
 }
 
+cPanel_func:AddPrivateVehicle(vehicleid, owner[])
+{
+	new string[64];
+
+	for(new i = 0; i < MAX_PRIV_VEHICLES; i++)
+	{
+		if(PrivateVehicles[i][pVehicle] != INVALID_VEHICLE_ID) continue;
+
+		PrivateVehicles[i][pVehicle] = vehicleid;
+		format(PrivateVehicles[i][pOwner], MAX_PLAYER_NAME, "%s", owner);
+		format(string, sizeof(string), "Private vehicle of %s", owner);
+		PrivateVehicles[i][pVehicleLabel] = Create3DTextLabel(string, -1, 0.0, 0.0, 0.0, 50, 0, 1);
+		Attach3DTextLabelToVehicle(PrivateVehicles[i][pVehicleLabel], vehicleid, 0.0, 0.0, 2.0);
+
+		printf("Private vehicle added for %s: vehicleid %i", owner, vehicleid);
+		break;
+	}
+}
+
+stock GetVehicleName(vehicleid)
+{
+	new vehicle[32];
+	for(new i = 0; i < sizeof(aVehicleNames); i++)
+	{
+		if(GetVehicleModel(vehicleid) == aVehicleNames[i][vModel])
+		{
+			strins(vehicle, aVehicleNames[i][vName], 0);
+			break;
+		}
+	}
+
+	if(isnull(vehicle))
+		strins(vehicle, "Unknown", 0);
+	return vehicle;
+}
+
 stock MsToString(millisecond, format[])
 {
     new

@@ -126,8 +126,15 @@ new aVehicleNames[212][e_vInfo] =
 	{"Stair Trailer", 608},{"Boxville", 609},{"Farm Plow", 610},{"Utility Trailer", 611}
 };
 
-new bool:ChatEnabled;
+enum e_pvehicles
+{
+	pVehicle,
+	pOwner[MAX_PLAYER_NAME],
+	Text3D:pVehicleLabel
+};
 
+new bool:ChatEnabled;
+new PrivateVehicles[MAX_PRIV_VEHICLES][e_pvehicles];
 
 public OnFilterScriptInit()
 {
@@ -151,6 +158,13 @@ public OnFilterScriptInit()
 	#endif
 
 	ChatEnabled = true;
+
+	for(new i = 0; i < MAX_PRIV_VEHICLES; i++)
+	{
+		PrivateVehicles[i][pOwner] = EOS;
+		PrivateVehicles[i][pVehicle] = INVALID_VEHICLE_ID;
+		PrivateVehicles[i][pVehicleLabel] = Text3D:INVALID_3DTEXT_ID;
+	}
 	return 1;
 }
 
@@ -247,6 +261,25 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 		{
 			SendClientMessage(playerid, -1, COL_VIP_1"-[VIP]- "COL_VIP_2"Your vehicle has been automaticly locked.");
 			LockVehicle(GetPlayerVehicleID(playerid));
+		}
+	}
+
+	if(newstate == PLAYER_STATE_DRIVER)
+	{
+		for(new i = 0; i < MAX_PRIV_VEHICLES; i++)
+		{
+			if(PrivateVehicles[i][pVehicle] == INVALID_VEHICLE_ID) break; //exit immediately, there won't be any after it
+			if(GetPlayerVehicleID(playerid) == PrivateVehicles[i][pVehicle])
+			{
+				if(!strcmp(PlayerInfo[playerid][Name], PrivateVehicles[i][pOwner]))
+					SendClientMessage(playerid, COLOR_GREEN, "You entered your private vehicle.");
+				else
+				{
+					RemovePlayerFromVehicle(playerid);
+					SendClientMessage(playerid, COLOR_RED, "This vehicle is a reserved vehicle.");
+				}
+				break;
+			}
 		}
 	}
 	return 1;

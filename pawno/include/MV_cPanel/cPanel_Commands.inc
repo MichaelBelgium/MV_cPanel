@@ -4,12 +4,12 @@ CMD:cmds(playerid,params[])
 
 	strcat(cmds, "General:\nstats admins report changepassword\n\n");
 
-	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nvipveh viprep viprepair viprep vipnos vipflip vipunlimnos vipheal vipgodcar viplock vipchat\n\n");
+	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nv(ip)veh v(ip)rep v(ip)repair v(ip)rep v(ip)nos v(ip)fl(ip) v(ip)unlimnos v(ip)heal v(ip)godcar v(ip)lock v(ip)chat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty togglechat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill cage uncage crash\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\nget goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip p(rivate)veh(icle)\n");
 
 	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Available commands:", cmds, "OK", "");
 	return 1;
@@ -1321,6 +1321,24 @@ CMD:removevip(playerid, params[])
 	SendClientMessage(id, -1, COL_VIP_1"-[VIP]-"COL_VIP_2" Your vip status has been removed.");
 	return 1;
 }
+
+CMD:privatevehicle(playerid,params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
+	new owner, string[128];
+
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You need to be in a vehicle to set that vehicle as a private one.");
+	if(sscanf(params, "i", owner)) return SendClientMessage(playerid, COLOR_RED, "Usage: /privatevehicle [ownerid/playerid]");
+	new veh = GetPlayerVehicleID(playerid);
+
+	AddPrivateVehicle(veh, GetPlayerNameEx(owner));
+
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"added a(n) %s (%i) as private vehicle for %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetVehicleName(veh), veh, GetPlayerNameEx(owner), owner);
+	SendClientMessageToAll(-1, string);
+	return 1;
+}
+
+CMD:pveh(playerid, params[]) return cmd_privatevehicle(playerid, params);
 
 // ================= VIP COMMANDS ===========================
 CMD:vipveh(playerid, params[])

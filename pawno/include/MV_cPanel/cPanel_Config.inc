@@ -14,6 +14,7 @@
 
 #define MAX_WARNINGS		5		//max warnings a player can have before he gets kicked/banned
 #define MAX_PING			500		//max ping a player can get, above = kick (0 to disable)
+#define MAX_PRIV_VEHICLES	20		//max private vehicles allowed in the server
 
 #define BAN_ON_WARN			false	//if true, a player which reaches MAX_WARNINGS he'll get banned, else kicked.
 #define BAN_ON_FWEAPON		true	//if true, a player that has a forbidden weapon (from the forbiddenWeapons array) he'll get banned, else kicked. 
