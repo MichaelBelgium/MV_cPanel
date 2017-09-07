@@ -277,6 +277,7 @@ CMD:spectate(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, string[128];
 
+	KillTimer(PlayerInfo[playerid][pTimer][3]);
 	if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
 	{
 		TogglePlayerSpectating(playerid, false);
@@ -287,17 +288,15 @@ CMD:spectate(playerid, params[])
 
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spectate [playerid]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
+	if(id == playerid) return SendClientMessage(playerid, COLOR_RED, "You can't spectate yourself.");
 
 	TogglePlayerSpectating(playerid, true);
-	if(IsPlayerInAnyVehicle(id))
-		PlayerSpectateVehicle(playerid, GetPlayerVehicleID(id));
-	else
-		PlayerSpectatePlayer(playerid, id);
+	PlayerInfo[playerid][pTimer][3] = SetTimerEx("SpectateTimer", 1000, true, "ii", playerid, id);
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"started spectating %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAdmins(-1, string);
 
-	SendClientMessage(playerid, COLOR_RED, "Use /spectate again to stop spectating.");
+	SendClientMessage(playerid, -1, COL_ADMIN_1"Use "COL_ADMIN_2"/spectate "COL_ADMIN_1"again to stop spectating.");
 
 	#if LOG_ADMINCOMMANDS
 		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "spectate", GetPlayerNameEx(id));
@@ -422,17 +421,20 @@ CMD:jail(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 
-	new id, reason[32], string[128];
+	new id, reason[32], string[128], minutes;
 
-	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /jail [playerid] [reason]");
+	if(sscanf(params, "is[32]I(3)", id, reason, minutes)) return SendClientMessage(playerid, COLOR_RED, "Usage: /jail [playerid] [reason] [Optional: minutes]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerInterior(id, 6);
 	SetPlayerPos(id, 264.6288,77.5742,1001.0391);
 	TogglePlayerControllable(id, false);
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"jailed %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
+	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"jailed %s (%i) for %i minutes. Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, minutes, reason);
 	SendClientMessageToAll(-1, string);
+
+	KillTimer(PlayerInfo[id][pTimer][2]);
+	PlayerInfo[id][pTimer][2] = SetTimerEx("JailTimer", minutes*60*1000, false, "i", id);
 
 	#if LOG_ADMINCOMMANDS
 		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "jail", GetPlayerNameEx(id), params);
@@ -448,9 +450,7 @@ CMD:unjail(playerid, params[])
 	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unjail [playerid]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
-	SetPlayerInterior(id, 0);
-	TogglePlayerControllable(id, true);
-	SpawnPlayer(id);
+	JailTimer(id);
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unjailed %s (%i).", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);

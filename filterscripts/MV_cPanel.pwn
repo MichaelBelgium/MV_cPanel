@@ -51,7 +51,7 @@ enum gPlayerInfo
 	Kills,
 	OnlineTime,
 	Tick[3], //0 = commands, 1 = chat, 2 = vip heal
-	pTimer[2], //0 = PlayerTimer, 1 = MuteTimer
+	pTimer[4], //0 = PlayerTimer, 1 = MuteTimer, 2 = jailtimer, 3 = spectatetimer
 	Selected_Id,
 	Warns,
 	Muted,
@@ -235,6 +235,8 @@ public OnPlayerDisconnect(playerid, reason)
 
 	KillTimer(PlayerInfo[playerid][pTimer][0]);
 	KillTimer(PlayerInfo[playerid][pTimer][1]);
+	KillTimer(PlayerInfo[playerid][pTimer][2]);
+	KillTimer(PlayerInfo[playerid][pTimer][3]);
 	return 1;
 }
 

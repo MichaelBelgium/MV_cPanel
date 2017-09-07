@@ -4,6 +4,8 @@ forward OnVipLoaded(playerid);
 forward OnPlayerLogin(playerid);
 forward PlayerTimer(playerid);
 forward UnmuteTimer(playerid);
+forward JailTimer(playerid);
+forward SpectateTimer(playerid, target);
 
 public OnAccountCheck(playerid)
 {
@@ -159,4 +161,27 @@ public UnmuteTimer(playerid)
 	SendClientMessage(playerid, COLOR_GREEN, string);
 
 	PlayerInfo[playerid][Muted] = 0;
+}
+
+public JailTimer(playerid)
+{
+	KillTimer(PlayerInfo[playerid][pTimer][2]);
+	SendClientMessage(playerid, COLOR_GREEN, "You have been unjailed.");
+
+	SetPlayerInterior(playerid, 0);
+	TogglePlayerControllable(playerid, true);
+	SpawnPlayer(playerid);
+}
+
+public SpectateTimer(playerid, target)
+{
+	if(IsPlayerConnected(target))
+	{
+		if(IsPlayerInAnyVehicle(target))
+			PlayerSpectateVehicle(playerid, GetPlayerVehicleID(target));
+		else
+			PlayerSpectatePlayer(playerid, target);	
+	}
+	else
+		cmd_spectate(playerid, ""); //equals stop spectating
 }
