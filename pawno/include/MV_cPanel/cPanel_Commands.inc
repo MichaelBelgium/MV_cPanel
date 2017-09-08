@@ -115,13 +115,12 @@ CMD:report(playerid, params[])
 // ================= ADMIN COMMANDS ===========================
 CMD:cpanel(playerid, params[])
 {
-	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
-	
 	if(IsPlayerAdmin(playerid) && !IsPlayerAdminEx(playerid, LEVEL_OWNER))
 	{
 		PlayerInfo[playerid][Adminlevel] = LEVEL_OWNER;
 		SendClientMessage(playerid, COLOR_GREEN, "Server assigned you as an owner (level 5)");
 	}
+	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	
 	ShowPlayerDialogEx(playerid, DIALOG_CPANEL);
 	return 1;
