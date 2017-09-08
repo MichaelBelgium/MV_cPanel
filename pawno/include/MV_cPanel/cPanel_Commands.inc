@@ -39,7 +39,7 @@ CMD:stats(playerid,params[])
 {
 	new string[128], stats[256], id, title[64];
 
-	if(sscanf(params, "i", id))
+	if(sscanf(params, "u", id))
 	{
 		format(title, sizeof(title), "Stats of %s (%i)", GetPlayerNameEx(playerid), playerid);
 
@@ -99,7 +99,7 @@ CMD:admins(playerid, params[])
 CMD:report(playerid, params[])
 {
 	new id, reason[32], string[128];
-	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /report [playerid] [reason]");
+	if(sscanf(params, "us[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /report [playerid / (part of) playername] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This playerid is not online.");
 
 	format(string, sizeof(string), "Incomming report! %s (%i) about %s (%i): %s", GetPlayerNameEx(playerid), playerid, GetPlayerNameEx(id), id, reason);
@@ -143,7 +143,7 @@ CMD:warn(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, reason[64], string[128];
-	if(sscanf(params, "is[64]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /warn [playerid] [reason]");
+	if(sscanf(params, "us[64]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /warn [playerid / (part of) playername] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	PlayerInfo[id][Warns]++;
@@ -195,7 +195,7 @@ CMD:eject(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 
 	new id, reason[64], string[128];
-	if(sscanf(params, "iS(No reason specified)[64]", id, reason)) return SendClientMessage(playerid, -1, "Usage: /eject [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[64]", id, reason)) return SendClientMessage(playerid, -1, "Usage: /eject [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(!IsPlayerInAnyVehicle(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't in any vehicle.");
 
@@ -215,7 +215,7 @@ CMD:mute(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, minutes, reason[32], string[128];
 
-	if(sscanf(params, "iI(3)S(Spamming)[32]", id, minutes, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /mute [playerid] [Optional: minutes (= 3)] [Optional: reason]");
+	if(sscanf(params, "uI(3)S(Spamming)[32]", id, minutes, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /mute [playerid / (part of) playername] [Optional: minutes (= 3)] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	PlayerInfo[id][Muted] = minutes;
@@ -235,7 +235,7 @@ CMD:unmute(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, string[128];
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unmute [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unmute [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(!IsPlayerMuted(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not muted.");
 
@@ -255,7 +255,7 @@ CMD:slap(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, Float:height, string[128], Float:pos[3];
 
-	if(sscanf(params, "iF(10.0)", id, height)) return SendClientMessage(playerid, COLOR_RED, "Usage: /slap [playerid] [Optional: height (= 10)]");
+	if(sscanf(params, "uF(10.0)", id, height)) return SendClientMessage(playerid, COLOR_RED, "Usage: /slap [playerid / (part of) playername] [Optional: height (= 10)]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
@@ -285,7 +285,7 @@ CMD:spectate(playerid, params[])
 		return 1;
 	}
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spectate [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spectate [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(id == playerid) return SendClientMessage(playerid, COLOR_RED, "You can't spectate yourself.");
 
@@ -310,7 +310,7 @@ CMD:disarm(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
 	new id, string[128];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /disarm [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /disarm [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	ResetPlayerWeapons(id);
@@ -384,7 +384,7 @@ CMD:akill(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 
 	new id, reason[32], string[128];
-	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /akill [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /akill [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerHealth(id, 0.0);
@@ -402,7 +402,7 @@ CMD:kick(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, reason[32], string[128];
 
-	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /kick [playerid] [reason]");
+	if(sscanf(params, "us[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /kick [playerid / (part of) playername] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
@@ -422,7 +422,7 @@ CMD:jail(playerid, params[])
 
 	new id, reason[32], string[128], minutes;
 
-	if(sscanf(params, "is[32]I(3)", id, reason, minutes)) return SendClientMessage(playerid, COLOR_RED, "Usage: /jail [playerid] [reason] [Optional: minutes]");
+	if(sscanf(params, "us[32]I(3)", id, reason, minutes)) return SendClientMessage(playerid, COLOR_RED, "Usage: /jail [playerid / (part of) playername] [reason] [Optional: minutes]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerInterior(id, 6);
@@ -446,7 +446,7 @@ CMD:unjail(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, string[128];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unjail [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unjail [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	JailTimer(id);
@@ -460,17 +460,11 @@ CMD:unjail(playerid, params[])
 	return 1;
 }
 
-// CMD:facepunch(playerid, params[])
-// {
-// 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
-// 	return 1;
-// }
-
 CMD:freeze(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, reason[32], string[128];
-	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /freeze [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /freeze [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	TogglePlayerControllable(id, false);
@@ -488,7 +482,7 @@ CMD:unfreeze(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, string[128];
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unfreeze [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unfreeze [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	TogglePlayerControllable(id, true);
@@ -506,7 +500,7 @@ CMD:burn(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, string[128], Float:pos[3];
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /burn [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /burn [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
@@ -526,7 +520,7 @@ CMD:crash(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new Float:pos[3], id, reason[32], string[128];
 
-	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /crash [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /crash [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
@@ -556,19 +550,12 @@ CMD:ajetpack(playerid, params[])
 	return 1;
 }
 
-// CMD:veh(playerid, params[])
-// {
-// 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
-// 	return 1;
-// }
-
-
 CMD:cage(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, reason[32], string[128];
 
-	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /cage [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /cage [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(IsPlayerCaged(id)) return SendClientMessage(playerid, COLOR_RED, "This player is already caged");
 
@@ -588,7 +575,7 @@ CMD:uncage(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
 	new id, string[128];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /uncage [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /uncage [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(!IsPlayerCaged(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not caged");
 
@@ -608,7 +595,7 @@ CMD:get(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, string[128], Float:pos[3];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /get [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /get [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
@@ -632,7 +619,7 @@ CMD:goto(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, string[128], Float:pos[3];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /goto [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /goto [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
@@ -656,7 +643,7 @@ CMD:ban(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, reason[32];
 
-	if(sscanf(params, "is[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /ban [playerid] [reason]");
+	if(sscanf(params, "us[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /ban [playerid / (part of) playername] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	BanPlayer(id, playerid, reason);
 
@@ -671,7 +658,7 @@ CMD:setinterior(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, interior, string[128];
 
-	if(sscanf(params, "ii", id, interior)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setinterior [playerid] [interiorid]");
+	if(sscanf(params, "ui", id, interior)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setinterior [playerid / (part of) playername] [interiorid]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerInterior(id, interior);
@@ -689,7 +676,7 @@ CMD:spawn(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, string[128];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spawn [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /spawn [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SpawnPlayer(id);
@@ -708,7 +695,7 @@ CMD:sethealth(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, Float:health, string[128];
 
-	if(sscanf(params, "if", id, health)) return SendClientMessage(playerid, COLOR_RED, "Usage: /sethealth [playerid] [health]");
+	if(sscanf(params, "uf", id, health)) return SendClientMessage(playerid, COLOR_RED, "Usage: /sethealth [playerid / (part of) playername] [health]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(health > 100.0) return SendClientMessage(playerid, COLOR_RED, "Health can only be 100 and less");
 
@@ -729,7 +716,7 @@ CMD:setarmour(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, Float:armour, string[128];
 
-	if(sscanf(params, "if", id, armour)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setarmour [playerid] [armour]");
+	if(sscanf(params, "uf", id, armour)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setarmour [playerid / (part of) playername] [armour]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(armour > 100.0) return SendClientMessage(playerid, COLOR_RED, "Armour can only be 100 and less");
 
@@ -768,7 +755,7 @@ CMD:setskin(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, skin, string[128];
 
-	if(sscanf(params, "ii", id, skin)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setskin [playerid] [skinid]");
+	if(sscanf(params, "ui", id, skin)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setskin [playerid / (part of) playername] [skinid]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(skin > 299) return SendClientMessage(playerid, COLOR_RED, "Skinid can only be 299 and less");
 
@@ -789,7 +776,7 @@ CMD:giveweapon(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, weapon, ammo, string[128];
 
-	if(sscanf(params, "iiI(500)", id, weapon, ammo)) return SendClientMessage(playerid, COLOR_RED, "Usage: /giveweapon [playerid] [weaponid] [Optional: ammo]");
+	if(sscanf(params, "uiI(500)", id, weapon, ammo)) return SendClientMessage(playerid, COLOR_RED, "Usage: /giveweapon [playerid / (part of) playername] [weaponid] [Optional: ammo]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(IsWeaponForbidden(weapon)) return SendClientMessage(playerid, COLOR_RED, "You are not permitted to give this weapon.");
 
@@ -813,7 +800,7 @@ CMD:explode(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, string[128], Float:pos[3];
 
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /explode [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /explode [playerid / (part of) playername]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	GetPlayerPos(id, pos[0], pos[1], pos[2]);
@@ -835,7 +822,7 @@ CMD:settime(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, time, string[128];
 
-	if(sscanf(params, "ii", id, time)) return SendClientMessage(playerid, COLOR_RED, "Usage: /settime [playerid] [time]");
+	if(sscanf(params, "ui", id, time)) return SendClientMessage(playerid, COLOR_RED, "Usage: /settime [playerid / (part of) playername] [time]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerTime(id, time, 0);
@@ -858,7 +845,7 @@ CMD:setweather(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, weather, string[128];
 
-	if(sscanf(params, "ii", id, weather)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setweather [playerid] [weather]");
+	if(sscanf(params, "ui", id, weather)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setweather [playerid / (part of) playername] [weather]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SetPlayerWeather(id, weather);
@@ -881,7 +868,7 @@ CMD:reconnect(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
 	new id, reason[32], string[128];
 
-	if(sscanf(params, "iS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /reconnect [playerid] [Optional: reason]");
+	if(sscanf(params, "uS(No reason specified)[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /reconnect [playerid / (part of) playername] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	PlayerInfo[id][Reconnecting] = true;
@@ -969,7 +956,7 @@ CMD:setscore(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
 	new id, score, string[128];
 
-	if(sscanf(params, "ii", id, score)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setscore [playerid] [score]");
+	if(sscanf(params, "ui", id, score)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setscore [playerid / (part of) playername] [score]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't connected");
 
 	SetPlayerScoreEx(id, score);
@@ -989,7 +976,7 @@ CMD:setmoney(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
 	new id, money, string[128];
 
-	if(sscanf(params, "ii", id, money)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setmoney [playerid] [money]");
+	if(sscanf(params, "ui", id, money)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setmoney [playerid / (part of) playername] [money]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't connected");
 
 	SetPlayerCash(id, money);
@@ -1238,7 +1225,7 @@ CMD:setlevel(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 	new id, level, string[128], oldlevel;
 
-	if(sscanf(params, "ii", id, level)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setlevel [playerid] [adminlevel]");
+	if(sscanf(params, "ui", id, level)) return SendClientMessage(playerid, COLOR_RED, "Usage: /setlevel [playerid / (part of) playername] [adminlevel]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(level == PlayerInfo[id][Adminlevel]) return SendClientMessage(playerid, COLOR_RED, "This player has already this adminlevel.");
 
@@ -1264,7 +1251,7 @@ CMD:fakechat(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 	new id, msg[128], string[256];
 
-	if(sscanf(params, "is[128]", id, msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /fakechat [playerid] [message]");
+	if(sscanf(params, "us[128]", id, msg)) return SendClientMessage(playerid, COLOR_RED, "Usage: /fakechat [playerid / (part of) playername] [message]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
 	SendPlayerMessageToAll(id, msg);
@@ -1283,7 +1270,7 @@ CMD:makevip(playerid,params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 
 	new id, duration, string[128];
-	if(sscanf(params, "iI(0)", id, duration)) return SendClientMessage(playerid, COLOR_RED, "Usage: /makevip [playerid] [Optional: duration (in months)]");
+	if(sscanf(params, "uI(0)", id, duration)) return SendClientMessage(playerid, COLOR_RED, "Usage: /makevip [playerid / (part of) playername] [Optional: duration (in months)]");
 
 	if(duration == 0)
 	{
@@ -1310,7 +1297,7 @@ CMD:removevip(playerid, params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 
 	new id;
-	if(sscanf(params, "i", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /removevip [playerid]");
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_RED, "Usage: /removevip [playerid / (part of) playername]");
 	if(!IsPlayerVIP(id)) return SendClientMessage(playerid, COLOR_RED, "This player isn't vip");
 
 	VipInfo[id][Duration] = -1;
@@ -1327,7 +1314,7 @@ CMD:privatevehicle(playerid,params[])
 	new owner, string[128];
 
 	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "You need to be in a vehicle to set that vehicle as a private one.");
-	if(sscanf(params, "i", owner)) return SendClientMessage(playerid, COLOR_RED, "Usage: /privatevehicle [ownerid/playerid]");
+	if(sscanf(params, "u", owner)) return SendClientMessage(playerid, COLOR_RED, "Usage: /privatevehicle [playerid / (part of) playername]");
 	new veh = GetPlayerVehicleID(playerid);
 
 	AddPrivateVehicle(veh, GetPlayerNameEx(owner));
