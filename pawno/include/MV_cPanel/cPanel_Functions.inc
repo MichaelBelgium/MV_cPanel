@@ -132,10 +132,19 @@ stock KickPlayer(playerid, admin, reason[])
 
 	SendClientMessageToAll(-1, string);
 
-	#if LOG_ANTICHEAT
 	if(admin == INVALID_PLAYER_ID)
-		SaveLog(LOG_TYPE_AC, "", "KICK", GetPlayerNameEx(playerid), reason);
-	#endif
+	{
+		#if LOG_ANTICHEAT
+			SaveLog(LOG_TYPE_AC, "", "KICK", GetPlayerNameEx(playerid), reason);
+		#endif
+	}
+	else
+	{
+		#if LOG_ADMINCOMMANDS
+			SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(admin), "kick", GetPlayerNameEx(playerid), reason);
+		#endif
+	}
+
 	Kick(playerid);
 }
 

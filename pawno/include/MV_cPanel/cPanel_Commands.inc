@@ -391,19 +391,12 @@ CMD:akill(playerid, params[])
 CMD:kick(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_MOD)) return 0;
-	new id, reason[32], string[128];
+	new id, reason[32];
 
 	if(sscanf(params, "us[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /kick [playerid / (part of) playername] [reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"kicked %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, reason);
-	SendClientMessageToAll(-1, string);
-
-	Kick(id);
-
-	#if LOG_ADMINCOMMANDS
-		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "kick", GetPlayerNameEx(id), reason);
-	#endif
+	KickPlayer(id, playerid, reason);
 	return 1;
 }
 
