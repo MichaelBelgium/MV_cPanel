@@ -11,6 +11,7 @@
 #define COOLDOWN_COMMAND	5		//time in seconds between command executes
 #define COOLDOWN_CHAT		2		//time in seconds between chat messages
 #define COOLDOWN_VIP_HEAL	600		//time in seconds between vip healing (/vipheal)
+#define COOLDOWN_MUTED		3		//default time in minutes to mute a player
 
 #define MAX_WARNINGS		5		//max warnings a player can have before he gets kicked/banned
 #define MAX_PING			500		//max ping a player can get, above = kick (0 to disable)

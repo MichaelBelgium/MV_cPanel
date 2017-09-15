@@ -229,6 +229,37 @@ stock GetWeaponNameEx(weaponid)
 }
 stock IsPlayerCaged(playerid) return IsValidObject(PlayerInfo[playerid][Cage][0]);
 
+stock MutePlayer(playerid, admin, reason[], minutes = COOLDOWN_MUTED)
+{
+	new string[128];
+
+	PlayerInfo[playerid][Muted] = minutes;
+
+	if(admin != INVALID_PLAYER_ID)
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, minutes, reason);
+	else
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", AC_NAME, GetPlayerNameEx(playerid), playerid, minutes, reason);
+
+	SendClientMessageToAll(-1, string);
+
+	KillTimer(PlayerInfo[playerid][pTimer][1]);
+	PlayerInfo[playerid][pTimer][1] = SetTimerEx("UnmutePlayer", PlayerInfo[playerid][Muted]*60*1000, false, "i", playerid);
+
+	format(string, sizeof(string), "%i %s", minutes, reason);
+	if(admin != INVALID_PLAYER_ID)
+	{
+		#if LOG_ADMINCOMMANDS
+			SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(admin), "mute", GetPlayerNameEx(playerid), string);
+		#endif
+	}
+	else
+	{
+		#if LOG_ANTICHEAT
+			SaveLog(LOG_TYPE_AC, "", "MUTE", GetPlayerNameEx(playerid), string);
+		#endif
+	}
+}
+
 stock CagePlayer(playerid)
 {
 	new Float:pos[3];
@@ -240,7 +271,6 @@ stock CagePlayer(playerid)
 	PlayerInfo[playerid][Cage][3] = CreateObject(985, pos[0], pos[1] - 4.0, pos[2], 0.0, 0.0, 180.0);
 
 	PlayerPlaySound(playerid, 1137, pos[0], pos[1], pos[2]);
-	
 }
 
 stock UncagePlayer(playerid)

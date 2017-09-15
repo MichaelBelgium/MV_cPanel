@@ -213,21 +213,12 @@ CMD:eject(playerid, params[])
 CMD:mute(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) return 0;
-	new id, minutes, reason[32], string[128];
+	new id, minutes, reason[32];
 
-	if(sscanf(params, "uI(3)S(Spamming)[32]", id, minutes, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /mute [playerid / (part of) playername] [Optional: minutes (= 3)] [Optional: reason]");
+	if(sscanf(params, "uI("#COOLDOWN_MUTED")S(Spamming)[32]", id, minutes, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /mute [playerid / (part of) playername] [Optional: minutes (= "#COOLDOWN_MUTED")] [Optional: reason]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 
-	PlayerInfo[id][Muted] = minutes;
-	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"muted %s (%i) for %i minute(s). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id, minutes, reason);
-	SendClientMessageToAll(-1, string);
-
-	KillTimer(PlayerInfo[id][pTimer][1]);
-	PlayerInfo[id][pTimer][1] = SetTimerEx("UnmuteTimer", PlayerInfo[id][Muted]*60*1000, false, "i", id);
-
-	#if LOG_ADMINCOMMANDS
-		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "mute", GetPlayerNameEx(id), params);
-	#endif
+	MutePlayer(id, playerid, reason, minutes);
 	return 1;
 }
 
@@ -239,7 +230,7 @@ CMD:unmute(playerid, params[])
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
 	if(!IsPlayerMuted(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not muted.");
 
-	UnmuteTimer(id);
+	UnmutePlayer(id);
 
 	format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"unmuted %s (%i)", GetPlayerLevelEx(GetPlayerLevel(playerid)), GetPlayerNameEx(playerid), GetPlayerNameEx(id), id);
 	SendClientMessageToAll(-1, string);

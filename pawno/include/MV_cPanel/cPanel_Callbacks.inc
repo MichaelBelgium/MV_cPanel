@@ -3,7 +3,7 @@ forward OnBanCheck(playerid);
 forward OnVipLoaded(playerid);
 forward OnPlayerLogin(playerid);
 forward PlayerTimer(playerid);
-forward UnmuteTimer(playerid);
+forward UnmutePlayer(playerid);
 forward JailTimer(playerid);
 forward SpectateTimer(playerid, target);
 
@@ -101,10 +101,14 @@ public OnPlayerLogin(playerid)
 		cache_get_value_name_int(0, "Deaths", PlayerInfo[playerid][Deaths]);
 		cache_get_value_name_int(0, "OnlineTime", PlayerInfo[playerid][OnlineTime]);
 		cache_get_value_name_int(0, "Warnings", PlayerInfo[playerid][Warns]);
+		cache_get_value_name_int(0, "Muted", PlayerInfo[playerid][Muted]);
 
 		ResetPlayerMoney(playerid);
 		SetPlayerCash(playerid, PlayerInfo[playerid][Money]);
 		SetPlayerScore(playerid, PlayerInfo[playerid][Score]);
+		if(IsPlayerMuted(playerid))
+				MutePlayer(playerid, INVALID_PLAYER_ID, "Still muted since last session.", PlayerInfo[playerid][Muted]);
+		
 
 		mysql_format(gCon, query, sizeof(query), "SELECT * FROM Vips WHERE Name = '%e'", PlayerInfo[playerid][Name]);
 		mysql_tquery(gCon, query, "OnVipLoaded", "i", playerid);
@@ -152,7 +156,7 @@ public PlayerTimer(playerid)
 	}
 }
 
-public UnmuteTimer(playerid)
+public UnmutePlayer(playerid)
 {
 	KillTimer(PlayerInfo[playerid][pTimer][1]);
 
