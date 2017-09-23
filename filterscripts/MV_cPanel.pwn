@@ -24,6 +24,7 @@ enum
 	DIALOG_REGISTER,
 	DIALOG_LOGIN,
 	DIALOG_VIP_VEH,
+	DIALOG_VIP_VEH_SEARCH,
 	DIALOG_CPANEL,
 	DIALOG_CPANEL_PLAYERPANEL,
 	DIALOG_CPANEL_SERVERPANEL,
@@ -132,7 +133,7 @@ enum e_pvehicles
 };
 
 new bool:ChatEnabled;
-new PrivateVehicles[MAX_PRIV_VEHICLES][e_pvehicles];
+new PrivateVehicles[MAX_PRIV_VEHICLES][e_pvehicles], VehicleSearch[MAX_PLAYERS][10][e_vInfo];
 
 public OnFilterScriptInit()
 {
@@ -196,6 +197,7 @@ public OnPlayerConnect(playerid)
 	VipInfo[playerid][Toggle][2] = false;
 	PlayerInfo[playerid][pTimer][0] = SetTimerEx("PlayerTimer", 5000, true, "i", playerid);
 	for(new i = 0; i < 4; i++) PlayerInfo[playerid][Cage][i] = INVALID_OBJECT_ID;
+	for(new i = 0; i < sizeof(VehicleSearch[]); i++) VehicleSearch[playerid][i][vModel] = INVALID_VEHICLE_ID;
 
 	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Bans WHERE Player = '%e' OR IP = '%e'", GetPlayerNameEx(playerid), PlayerInfo[playerid][IP]);
 	mysql_tquery(gCon, query, "OnBanCheck", "i", playerid);
@@ -320,6 +322,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(!response) return 1;
 
 			if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED, "Please be on foot to spawn a vehicle.");
+			if(strlen(inputtext) < 3) return SendClientMessage(playerid, COLOR_RED, "Please enter more characters");
 			new bool:found = false;
 
 			for(new i = 0; i < sizeof(aVehicleNames); i++)
@@ -341,7 +344,41 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 
 			if(!found)
-				SendClientMessage(playerid, COLOR_RED, "Couldn't find vehicle.");
+			{
+				new search[256*5], pointer = 0;
+				for(new i = 0; i < sizeof(aVehicleNames); i++)
+				{
+					if(strfind(aVehicleNames[i][vName], inputtext, true) == -1) continue;
+
+					format(string, sizeof(string), "%i: %s\n", aVehicleNames[i][vModel], aVehicleNames[i][vName]);
+					strcat(search, string);
+
+					VehicleSearch[playerid][pointer][vModel] = aVehicleNames[i][vModel];
+					format(VehicleSearch[playerid][pointer][vName], 32, "%s", aVehicleNames[i][vName]);
+					pointer++;
+				}
+
+				if(VehicleSearch[playerid][0][vModel] == INVALID_VEHICLE_ID)
+					SendClientMessage(playerid, COLOR_RED, "No results found");
+				else
+					ShowPlayerDialog(playerid, DIALOG_VIP_VEH_SEARCH, DIALOG_STYLE_LIST, "Do you mean ...", search, "Spawn", "Cancel");
+			}
+		}
+
+		case DIALOG_VIP_VEH_SEARCH:
+		{
+			if(!response) return 1;
+
+			new Float:pos[3], vehicle = INVALID_VEHICLE_ID;
+			GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+
+			vehicle = CreateVehicle(VehicleSearch[playerid][listitem][vModel], pos[0], pos[1], pos[2], 0, -1, -1, -1);
+			PutPlayerInVehicle(playerid, vehicle, 0);
+
+			format(string, sizeof(string), COL_VIP_1"-[VIP]- "COL_VIP_2"%s (%i) has spawned a %s (%i)", GetPlayerNameEx(playerid), playerid, VehicleSearch[playerid][listitem][vName], VehicleSearch[playerid][listitem][vModel]);
+			SendClientMessageToAll(-1, string);
+
+			for(new i = 0; i < sizeof(VehicleSearch[]); i++) VehicleSearch[playerid][i][vModel] = INVALID_VEHICLE_ID;
 		}
 
 		case DIALOG_CPANEL:
