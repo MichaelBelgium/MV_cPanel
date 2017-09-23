@@ -97,8 +97,6 @@ public OnPlayerLogin(playerid)
 		cache_get_value_name_int(0, "Score", PlayerInfo[playerid][Score]);
 		cache_get_value_name_int(0, "Money", PlayerInfo[playerid][Money]);
 		cache_get_value_name_int(0, "Adminlevel", PlayerInfo[playerid][Adminlevel]);
-		cache_get_value_name_int(0, "Kills", PlayerInfo[playerid][Kills]);
-		cache_get_value_name_int(0, "Deaths", PlayerInfo[playerid][Deaths]);
 		cache_get_value_name_int(0, "OnlineTime", PlayerInfo[playerid][OnlineTime]);
 		cache_get_value_name_int(0, "Warnings", PlayerInfo[playerid][Warns]);
 		cache_get_value_name_int(0, "Muted", PlayerInfo[playerid][Muted]);

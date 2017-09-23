@@ -39,8 +39,6 @@ CREATE TABLE `Players` (
   `Score` int(11) NOT NULL DEFAULT '0',
   `Money` int(11) NOT NULL DEFAULT '0',
   `Adminlevel` tinyint(4) NOT NULL DEFAULT '0',
-  `Kills` int(11) NOT NULL DEFAULT '0',
-  `Deaths` int(11) NOT NULL DEFAULT '0',
   `Warnings` tinyint(4) NOT NULL DEFAULT '0',
   `Muted` tinyint(4) NOT NULL DEFAULT '0',
   `OnlineTime` int(11) NOT NULL DEFAULT '0',

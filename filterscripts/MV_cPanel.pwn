@@ -47,8 +47,6 @@ enum gPlayerInfo
 	Score,
 	Money,
 	Adminlevel,
-	Deaths,
-	Kills,
 	OnlineTime,
 	Tick[3], //0 = commands, 1 = chat, 2 = vip heal
 	pTimer[4], //0 = PlayerTimer, 1 = MuteTimer, 2 = jailtimer, 3 = spectatetimer
@@ -184,9 +182,7 @@ public OnPlayerConnect(playerid)
 	GetPlayerIp(playerid, PlayerInfo[playerid][IP], 16);
 
 	PlayerInfo[playerid][Score] = 
-	PlayerInfo[playerid][Money] = 
-	PlayerInfo[playerid][Kills] =
-	PlayerInfo[playerid][Deaths] =
+	PlayerInfo[playerid][Money] =
 	PlayerInfo[playerid][OnlineTime] = 
 	PlayerInfo[playerid][Warns] =
 	PlayerInfo[playerid][Muted] =
@@ -210,7 +206,7 @@ public OnPlayerDisconnect(playerid, reason)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_NONE)
 	{
-		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, Kills = %i, Deaths = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", GetPlayerScoreEx(playerid), GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][Kills], PlayerInfo[playerid][Deaths], PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], GetPlayerNameEx(playerid));
+		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Score = %i, Money = %i, Adminlevel = %i, lIP = '%s', OnlineTime = OnlineTime + %i, Warnings = %i WHERE Playername = '%e'", GetPlayerScoreEx(playerid), GetPlayerCash(playerid), GetPlayerLevel(playerid), PlayerInfo[playerid][IP], NetStats_GetConnectedTime(playerid)/1000, PlayerInfo[playerid][Warns], GetPlayerNameEx(playerid));
 		mysql_query(gCon, query, false);
 
 		mysql_format(gCon, query, sizeof(query), "UPDATE Players SET Muted = %i WHERE Playername = '%e'", PlayerInfo[playerid][Muted], GetPlayerNameEx(playerid));
@@ -250,11 +246,6 @@ public OnPlayerSpawn(playerid)
 
 public OnPlayerDeath(playerid, killerid, reason)
 {
-	if(killerid != INVALID_PLAYER_ID)
-	{
-		PlayerInfo[killerid][Kills]++;
-		PlayerInfo[playerid][Deaths]++;
-	}
 	return 1;
 }
 
