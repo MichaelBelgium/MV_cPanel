@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `Reason` varchar(32) NOT NULL,
   `IP` varchar(16) NOT NULL,
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Duration` int(11) NOT NULL DEFAULT '0',
   `Unbanned` tinyint(1) NOT NULL DEFAULT '0',
   `UnbannedDate` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`bID`),

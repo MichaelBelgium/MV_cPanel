@@ -89,23 +89,30 @@ stock SaveLog(logtype, player[] = "", command[] = "", target[] = "", params[] = 
 	mysql_tquery(gCon, query);
 }
 
-stock BanPlayer(playerid, admin, reason[])
+stock BanPlayer(playerid, admin, reason[], months = 0)
 {
-	new string[128], tmpadmin[MAX_PLAYER_NAME];
+	new string[128], tmpadmin[MAX_PLAYER_NAME], monthstring[64];
+
+	if(months != 0)
+		format(monthstring, sizeof(monthstring), " for %i month(s)", months);
+
 	if(admin != INVALID_PLAYER_ID)
 	{
-		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, reason);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has banned %s (%i)%s. Reason: %s", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), GetPlayerNameEx(playerid), playerid, monthstring, reason);
 		mysql_format(gCon, tmpadmin, sizeof(tmpadmin), "'%e'", GetPlayerNameEx(admin));
 	}
 	else
 	{
-		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"has banned %s (%i). Reason: %s", AC_NAME, GetPlayerNameEx(playerid), playerid, reason);
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"has banned %s (%i)%s. Reason: %s", AC_NAME, GetPlayerNameEx(playerid), playerid, monthstring, reason);
 		format(tmpadmin, sizeof(tmpadmin), "%s", "NULL");
 	}
 
 	SendClientMessageToAll(-1, string);
 
-	mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP) VALUE ('%e', %s, '%e', '%s')", GetPlayerNameEx(playerid), tmpadmin, reason, PlayerInfo[playerid][IP]);
+	if(months == 0)
+		mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP) VALUE ('%e', %s, '%e', '%s')", GetPlayerNameEx(playerid), tmpadmin, reason, PlayerInfo[playerid][IP]);
+	else
+		mysql_format(gCon, query, sizeof(query), "INSERT INTO Bans (Player, Admin, Reason, IP, Duration) VALUE ('%e', %s, '%e', '%s', UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL + %d MONTH)))", GetPlayerNameEx(playerid), tmpadmin, reason, PlayerInfo[playerid][IP], months);
 	mysql_tquery(gCon, query);
 
 	#if LOG_ANTICHEAT
@@ -123,7 +130,7 @@ stock UnbanPlayer(player[], admin)
 	mysql_format(gCon, query, sizeof(query), "UPDATE Bans SET Unbanned = 1, UnbannedDate = CURRENT_TIMESTAMP WHERE Player = '%e' AND Unbanned = 0", player);
 	result = mysql_query(gCon, query);
 
-	if(cache_affected_rows() == 0)	
+	if(cache_affected_rows() == 0)
 	{
 		cache_delete(result);
 		return false;

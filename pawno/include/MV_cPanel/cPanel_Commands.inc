@@ -709,14 +709,16 @@ CMD:goto(playerid, params[])
 CMD:ban(playerid, params[])
 {
 	if(!IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) return 0;
-	new id, reason[32];
+	new id, reason[32], months;
 
-	if(sscanf(params, "us[32]", id, reason)) return SendClientMessage(playerid, COLOR_RED, "Usage: /ban [playerid / (part of) playername] [reason]");
+	if(sscanf(params, "us[32]I(0)", id, reason, months)) return SendClientMessage(playerid, COLOR_RED, "Usage: /ban [playerid / (part of) playername] [reason] [Optional: duration (in months)]");
 	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_RED, "This player is not online.");
-	BanPlayer(id, playerid, reason);
+	BanPlayer(id, playerid, reason, months);
 
 	#if LOG_ADMINCOMMANDS
-		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "ban", GetPlayerNameEx(id), reason);
+		new string[64];
+		format(string, sizeof(string), "%s %i", reason, months);
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "ban", GetPlayerNameEx(id), string);
 	#endif
 	return 1;
 }
@@ -1352,7 +1354,7 @@ CMD:makevip(playerid,params[])
 	if(!IsPlayerAdminEx(playerid, LEVEL_OWNER)) return 0;
 
 	new id, duration, string[128];
-	if(sscanf(params, "uI(0)", id, duration)) return SendClientMessage(playerid, COLOR_RED, "Usage: /makevip [playerid / (part of) playername] [Optional: duration (in months)]");
+	if(sscanf(params, "uI(0)", id, duration)) return SendClientMessage(playerid, COLOR_RED, "Usage: /makevip [playerid / (part of) playername] [Optional: duration (in months)] - If months is not specified = permanent ban");
 
 	if(duration == 0)
 	{
