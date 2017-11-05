@@ -2,7 +2,7 @@ CMD:cmds(playerid,params[])
 {
 	new cmds[256*3];
 
-	strcat(cmds, "General:\nstats admins report changepassword\n\n");
+	strcat(cmds, "General:\nstats admins report changepassword suggest(s) bug(s)\n\n");
 
 	if(IsPlayerVIP(playerid)) strcat(cmds, "Vips:\nv(ip)veh v(ip)rep v(ip)repair v(ip)rep v(ip)nos v(ip)fl(ip) v(ip)unlimnos v(ip)heal v(ip)godcar v(ip)lock v(ip)chat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty togglechat\n\n");
@@ -109,6 +109,90 @@ CMD:report(playerid, params[])
 	#if LOG_REPORTS
 		SaveLog(LOG_TYPE_REPORTS, GetPlayerNameEx(playerid), "", GetPlayerNameEx(id), reason);
 	#endif
+	return 1;
+}
+
+CMD:suggest(playerid, params[])
+{
+	new text[256];
+	if(sscanf(params, "s[256]", text)) return SendClientMessage(playerid, COLOR_RED, "Usage: /suggest [your suggestion]");
+
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO suggestions (Playername, Suggestion) VALUES ('%e', '%e')", GetPlayerNameEx(playerid), text);
+	mysql_tquery(gCon, query);
+
+	SendClientMessage(playerid, COLOR_GREEN, "You have successfully suggested something for the server. Execute /suggests to see all suggestions that has been made.");
+	return 1;
+}
+
+CMD:bug(playerid, params[])
+{
+	new text[256];
+	if(sscanf(params, "s[256]", text)) return SendClientMessage(playerid, COLOR_RED, "Usage: /bug [your bug report]");
+
+	mysql_format(gCon, query, sizeof(query), "INSERT INTO bugs (Playername, Bug) VALUES ('%e', '%e')", GetPlayerNameEx(playerid), text);
+	mysql_tquery(gCon, query);
+
+	SendClientMessage(playerid, COLOR_GREEN, "You have successfully reported a bug. Execute /bugs to see all reported bugs.");
+	return 1;
+}
+
+CMD:suggests(playerid, params[])
+{
+	new Cache:result, rows, suggestions[256*5], string[512*2];
+	new sID, name[MAX_PLAYER_NAME], sug[512], date[32];
+
+	result = mysql_query(gCon, "SELECT * FROM suggestions ORDER BY sID DESC LIMIT 10");
+	rows = cache_num_rows();
+
+	if(rows == 0)
+		suggestions = "No suggestions found";
+	else
+	{
+		for(new i = 0; i < rows; i++)
+		{
+			cache_get_value_name_int(i, "sID", sID);
+			cache_get_value_name(i, "Playername", name);
+			cache_get_value_name(i, "Suggestion", sug);
+			cache_get_value_name(i, "Date", date);
+
+			format(string, sizeof(string), "Suggestion %d by %s at %s\n\t%s\n\n", sID, name, date, sug);
+			strcat(suggestions, string);
+		}
+	}
+
+	cache_delete(result);
+
+	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Last suggestions:", suggestions, "OK", "");
+	return 1;
+}
+
+CMD:bugs(playerid, params[])
+{
+	new Cache:result, rows, bugs[256*5], string[512*2];
+	new bID, name[MAX_PLAYER_NAME], bug[512], date[32];
+
+	result = mysql_query(gCon, "SELECT * FROM bugs ORDER BY bID DESC LIMIT 10");
+	rows = cache_num_rows();
+
+	if(rows == 0)
+		bugs = "No bugs found";
+	else
+	{
+		for(new i = 0; i < rows; i++)
+		{
+			cache_get_value_name_int(i, "bID", bID);
+			cache_get_value_name(i, "Playername", name);
+			cache_get_value_name(i, "Bug", bug);
+			cache_get_value_name(i, "Date", date);
+
+			format(string, sizeof(string), "Bug report %d by %s at %s\n\t%s\n\n", bID, name, date, bug);
+			strcat(bugs, string);
+		}
+	}
+
+	cache_delete(result);
+
+	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Last bugs:", bugs, "OK", "");
 	return 1;
 }
 
