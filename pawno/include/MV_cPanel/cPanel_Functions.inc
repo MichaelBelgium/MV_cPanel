@@ -116,6 +116,36 @@ stock BanPlayer(playerid, admin, reason[])
 	Kick(playerid);
 }
 
+stock UnbanPlayer(player[], admin)
+{
+	new string[128], Cache:result;
+
+	mysql_format(gCon, query, sizeof(query), "UPDATE Bans SET Unbanned = 1, UnbannedDate = CURRENT_TIMESTAMP WHERE Player = '%e' AND Unbanned = 0", player);
+	result = mysql_query(gCon, query);
+
+	if(cache_affected_rows() == 0)	
+	{
+		cache_delete(result);
+		return false;
+	}
+
+	cache_delete(result);
+
+	if(admin != INVALID_PLAYER_ID)
+		format(string, sizeof(string), COL_ADMIN_1"-[%s: %s]- "COL_ADMIN_2"has unbanned %s.", GetPlayerLevelEx(GetPlayerLevel(admin)), GetPlayerNameEx(admin), player);
+	else
+		format(string, sizeof(string), COL_ADMIN_1"-[%s]- "COL_ADMIN_2"has unbanned %s.", AC_NAME, player);
+
+	SendClientMessageToAll(-1, string);
+
+	#if LOG_ANTICHEAT
+	if(admin == INVALID_PLAYER_ID)
+		SaveLog(LOG_TYPE_AC, "", "UNBAN", player);
+	#endif
+
+	return true;
+}
+
 stock KickPlayer(playerid, admin, reason[])
 {
 	new string[128], tmpadmin[MAX_PLAYER_NAME];

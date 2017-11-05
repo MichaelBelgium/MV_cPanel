@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `Reason` varchar(32) NOT NULL,
   `IP` varchar(16) NOT NULL,
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Unbanned` tinyint(1) NOT NULL DEFAULT '0',
+  `UnbannedDate` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`bID`),
   KEY `Player` (`Player`,`Admin`),
   KEY `Admin` (`Admin`)
@@ -29,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `bugs` (
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`bID`),
   KEY `Playername` (`Playername`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -49,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
   PRIMARY KEY (`lID`),
   KEY `Player` (`Player`),
   KEY `Target` (`Target`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -86,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `suggestions` (
   `Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`sID`),
   KEY `Playername` (`Playername`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

@@ -199,7 +199,7 @@ public OnPlayerConnect(playerid)
 	for(new i = 0; i < 4; i++) PlayerInfo[playerid][Cage][i] = INVALID_OBJECT_ID;
 	for(new i = 0; i < sizeof(VehicleSearch[]); i++) VehicleSearch[playerid][i][vModel] = INVALID_VEHICLE_ID;
 
-	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Bans WHERE Player = '%e' OR IP = '%e'", GetPlayerNameEx(playerid), PlayerInfo[playerid][IP]);
+	mysql_format(gCon, query, sizeof(query), "SELECT * FROM Bans WHERE (Player = '%e' OR IP = '%e') AND Unbanned = 0", GetPlayerNameEx(playerid), PlayerInfo[playerid][IP]);
 	mysql_tquery(gCon, query, "OnBanCheck", "i", playerid);
 	return 1;
 }

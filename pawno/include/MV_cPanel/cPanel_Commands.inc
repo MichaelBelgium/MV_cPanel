@@ -8,7 +8,7 @@ CMD:cmds(playerid,params[])
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_MOD)) strcat(cmds, "Trial mod:\nwarn asay eject mute unmute slap spectate disarm adminduty togglechat\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_MOD)) strcat(cmds, "Moderator:\nannounce kick jail unjail freeze unfreeze burn ajetpack akill cage uncage crash\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_TRIAL_ADMIN)) strcat(cmds, "Trial administrator:\nget goto ban setinterior spawn sethealth setarmour healall setskin giveweapon explode settime setweather reconnect setallskin setalltime setallweather\n\n");
-	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall\n\n");
+	if(IsPlayerAdminEx(playerid, LEVEL_ADMIN)) strcat(cmds, "Administrator:\nsetscore setmoney armourall setallscore spawnall giveallweapon killall getall ejectall godall ungodall freezeall unfreezeall unban\n\n");
 	if(IsPlayerAdminEx(playerid, LEVEL_OWNER)) strcat(cmds, "Owner:\nsetlevel fakechat makevip removevip p(rivate)veh(icle)\n");
 
 	ShowPlayerDialog(playerid, DIALOG_NORESPONSE, DIALOG_STYLE_MSGBOX, "Available commands:", cmds, "OK", "");
@@ -1283,6 +1283,20 @@ CMD:unfreezeall(playerid, params[])
 
 	#if LOG_ADMINCOMMANDS
 		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "unfreezeall");
+	#endif
+	return 1;
+}
+
+CMD:unban(playerid, params[])
+{
+	if(!IsPlayerAdminEx(playerid, LEVEL_ADMIN)) return 0;
+	new player[MAX_PLAYER_NAME];
+
+	if(sscanf(params, "s[24]", player)) return SendClientMessage(playerid, COLOR_RED, "Usage: /unban [playername]");
+	if(!UnbanPlayer(player, playerid)) return SendClientMessage(playerid, COLOR_RED, "This player is not banned.");
+
+	#if LOG_ADMINCOMMANDS
+		SaveLog(LOG_TYPE_ACMDS, GetPlayerNameEx(playerid), "unban", player);
 	#endif
 	return 1;
 }
